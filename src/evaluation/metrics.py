@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from statistics import mean
 import os
 import sys
@@ -13,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from core.config import Settings
 from core.utils import normalize_whitespace, read_json, write_json
+from retrieval.agent import build_agent, run_agent_question
 from retrieval.embeddings import MiniLMEmbeddings
 from retrieval.index import LocalEmbeddingIndex
 from retrieval.llm import build_llm
@@ -167,6 +169,92 @@ def _run_ragas(settings: Settings, answers: list[dict[str, Any]]) -> dict[str, A
         }
 
 
+def _agent_answers_path(answers_output_path) -> Path:
+    path = Path(answers_output_path)
+    stem = path.stem.removesuffix("_answers")
+    return path.with_name(f"{stem}_agent_answers{path.suffix or '.json'}")
+
+
+def _run_agent_evaluation(
+    settings: Settings,
+    index: LocalEmbeddingIndex,
+    test_set: list[dict[str, Any]],
+    answers_output_path,
+) -> dict[str, Any]:
+    """Optionally score the LangChain agent separately from the extractive QA path."""
+    if os.getenv("RUN_AGENT_EVALUATION", "").strip().lower() not in {"1", "true", "yes"}:
+        return {
+            "status": "skipped",
+            "enabled": False,
+            "message": "Set RUN_AGENT_EVALUATION=1 to evaluate the LangChain agent.",
+            "scores": {},
+        }
+
+    try:
+        agent = build_agent(settings=settings, index=index)
+    except Exception as exc:
+        return {
+            "status": "error",
+            "enabled": True,
+            "samples": 0,
+            "error_type": type(exc).__name__,
+            "message": "Agent initialization failed; check the configured provider and credentials.",
+            "scores": {},
+        }
+
+    agent_answers: list[dict[str, Any]] = []
+    for item in test_set:
+        error_type = None
+        try:
+            prediction = run_agent_question(agent, item["question"])
+        except Exception as exc:
+            prediction = ""
+            error_type = type(exc).__name__
+            judge = JudgeVerdict(
+                score=1,
+                correct=False,
+                reasoning=f"Agent invocation failed ({error_type}).",
+            )
+        else:
+            judge = _judge_answer(settings, item["question"], item["ground_truth"], prediction)
+
+        answer_record = {
+            "id": item["id"],
+            "question_type": item["question_type"],
+            "question": item["question"],
+            "ground_truth": item["ground_truth"],
+            "answer": prediction,
+            "token_f1": _token_f1(item["ground_truth"], prediction),
+            "judge": judge.model_dump(),
+        }
+        if error_type:
+            answer_record["agent_error_type"] = error_type
+        agent_answers.append(answer_record)
+
+    output_path = _agent_answers_path(answers_output_path)
+    write_json(output_path, agent_answers)
+    answered_samples = sum(bool(item["answer"].strip()) for item in agent_answers)
+    score_count = len(agent_answers)
+    scores = {
+        "mean_token_f1": mean(item["token_f1"] for item in agent_answers) if score_count else 0.0,
+        "judge_accuracy": (
+            mean(1.0 if item["judge"]["correct"] else 0.0 for item in agent_answers)
+            if score_count
+            else 0.0
+        ),
+        "mean_judge_score": mean(item["judge"]["score"] for item in agent_answers) if score_count else 0.0,
+    }
+    status = "ok" if answered_samples == score_count else "partial" if answered_samples else "error"
+    return {
+        "status": status,
+        "enabled": True,
+        "samples": score_count,
+        "answered_samples": answered_samples,
+        "scores": scores,
+        "answers_path": output_path.name,
+    }
+
+
 def evaluate_pipeline(
     settings: Settings,
     index: LocalEmbeddingIndex,
@@ -220,6 +308,12 @@ def evaluate_pipeline(
         "judge_accuracy": mean(1.0 if item["judge"]["correct"] else 0.0 for item in answers),
         "mean_judge_score": mean(item["judge"]["score"] for item in answers),
     }
+    summary["agent_evaluation"] = _run_agent_evaluation(
+        settings,
+        index,
+        test_set,
+        answers_output_path,
+    )
     summary["ragas"] = _run_ragas(settings, answers)
 
     bundle = EvaluationBundle(summary=summary, answers=answers)
