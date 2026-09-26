@@ -25,6 +25,8 @@ def _load_clean_frame(path) -> pd.DataFrame:
 def _print_comparison(baseline: dict, corrupted: dict, repaired: dict) -> None:
     rows = [
         ("Hit Rate", "retrieval_hit_rate"),
+        ("MAP", "map"),
+        ("MRR", "mrr"),
         ("Token F1", "mean_token_f1"),
         ("LLM Judge Accuracy", "judge_accuracy"),
     ]
@@ -33,6 +35,18 @@ def _print_comparison(baseline: dict, corrupted: dict, repaired: dict) -> None:
     for label, key in rows:
         values = [float(metrics.get(key, 0.0) or 0.0) for metrics in (baseline, corrupted, repaired)]
         print(f"{label:<24} {values[0]:>11.1%} {values[1]:>11.1%} {values[2]:>11.1%}")
+
+    print("\nRAGAS status and scores")
+    ragas_keys = ("answer_relevancy", "context_precision", "context_recall", "faithfulness")
+    statuses = [str((metrics.get("ragas") or {}).get("status", "unknown")) for metrics in (baseline, corrupted, repaired)]
+    print(f"{'Status':<24} {statuses[0]:>12} {statuses[1]:>12} {statuses[2]:>12}")
+    for key in ragas_keys:
+        values = [
+            ((metrics.get("ragas") or {}).get("scores", {}) or {}).get(key)
+            for metrics in (baseline, corrupted, repaired)
+        ]
+        formatted = ["N/A" if value is None else f"{float(value):.1%}" for value in values]
+        print(f"RAGAS {key:<17} {formatted[0]:>12} {formatted[1]:>12} {formatted[2]:>12}")
 
 
 def main() -> None:

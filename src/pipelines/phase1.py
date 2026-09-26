@@ -72,6 +72,13 @@ def main() -> None:
 
     print("Baseline pipeline completed.")
     print(json.dumps(bundle.summary, indent=2, ensure_ascii=False))
+    print(f"MAP: {bundle.summary['map']:.1%}")
+    print(f"MRR: {bundle.summary['mrr']:.1%}")
+    ragas = bundle.summary.get("ragas", {})
+    print(f"RAGAS status: {ragas.get('status', 'unknown')}")
+    for metric_name, score in (ragas.get("scores", {}) or {}).items():
+        formatted = "N/A" if score is None else f"{float(score):.1%}"
+        print(f"RAGAS {metric_name}: {formatted}")
     print(f"Quality gate: {quality['success']} ({quality['engine']})")
     print(f"Freshness SLA: {freshness['is_fresh']} ({freshness['stale_rows']}/{freshness['total_rows']} stale)")
     print(f"Report: {settings.paths.baseline_report}")

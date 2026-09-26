@@ -19,11 +19,13 @@
       "Title: Advanced Perspectives on Hybrid Search Architectures: Combining BM25 with Dense Representations\nAuthors: Dat Tran, Lan Pham\nPublished: 2025-06-11\nCategories: Information Retrieval, Algorithms\nSummary: An extended empirical study on ense vector search excels at conceptual similarity but struggles with exact acronyms and serial numbers. Reciprocal Rank Fusion of sparse lexical scores and dense embeddings achieves optimal recall Further analysis on scaling parameters."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 0.0,
     "judge": {
       "score": 1,
       "correct": false,
-      "reasoning": "The model answer provides no content or summary, failing to address the question; therefore it is materially incorrect."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -48,11 +50,13 @@
       "Title: Automat\nAuthors: Son Nguyen, Thuy Doan\nPublished: 2025-06-08\nCategories: Data Quality, DevOps\nSummary: Embedding quality checks directly into data pipelines enables fail-closed governance. We show how Great Expectations suites catch schema drifts and null fields before documents reach the embedding model."
     ],
     "retrieval_hit": false,
+    "average_precision": 0.0,
+    "reciprocal_rank": 0.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct authors Anh Tran and Quoc Pham."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -75,11 +79,13 @@
       "Title: Hybrid \nAuthors: Dat Tran, Lan Pham\nPublished: 2025-05-14\nCategories: Information Retrieval, Algorithms\nSummary: Dense vector search excels at conceptual similarity but struggles with exact acronyms and serial numbers. Reciprocal Rank Fusion of sparse lexical scores and dense embeddings achieves optimal recall."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 0.0,
     "judge": {
       "score": 1,
       "correct": false,
-      "reasoning": "The model answer gives 2025-04-18, but the reference answer states the correct publication date is 2026-04-18, so the answer is materially incorrect."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -104,11 +110,13 @@
       "Title: Semantic Layer Integration for Agentic Text-to-SQL Pipelines\nAuthors: Huy Dinh, Trang Vo\nPublished: 2025-05-02\nCategories: Databases, Information Systems\nSummary: Connecting LLMs directly to raw warehouse tables often results in schema misunderstandings. A governed semantic layer standardizes business metric definitions, dramatically boosting SQL generation accuracy. ### %% CORRUPTION_NOISE_7xQ @@@"
     ],
     "retrieval_hit": false,
+    "average_precision": 0.0,
+    "reciprocal_rank": 0.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, listing both categories correctly."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -131,11 +139,13 @@
       "Title: Advanced Perspectives on Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines\nAuthors: Quang Le, Yen Vu\nPublished: 2025-06-12\nCategories: Evaluation Methodology, Enterprise Systems\nSummary: An extended empirical study on tatic benchmarks fail to capture domain drift in enterprise knowledge bases. We establish a synthetic test generator that auto-creates paired evaluation sets whenever new corpora are ingested Further analysis on scaling parameters."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct summary of the paper."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -158,11 +168,13 @@
       "Title: Agentic Retrieval-Augmented Generation for Knowledge-Intensive Tasks\nAuthors: Minh Nguyen, Hoang Le\nPublished: 2025-05-20\nCategories: Artificial Intelligence, Information Retrieval\nSummary: "
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct authors Huy Dinh and Trang Vo."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -187,11 +199,13 @@
       "Title: Mitigating Ghost Vectors in Dense Retrieval via Idempotent Indexing\nAuthors: Duc Vu, Thao Dang\nPublished: 2025-04-18\nCategories: Databases, Information Systems\nSummary: Soft-deletions in vector databases leave orphaned embeddings that lead to hallucinations. This paper designs an idempotent index synchronization protocol that guarantees complete purges of outdated vector artifacts. ### %% CORRUPTION_NOISE_7xQ @@@"
     ],
     "retrieval_hit": false,
+    "average_precision": 0.0,
+    "reciprocal_rank": 0.0,
     "token_f1": 0.0,
     "judge": {
       "score": 1,
       "correct": false,
-      "reasoning": "The model answer gives the date 2025-06-07, which does not match the reference answer of 2026-06-25, so it is materially incorrect."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -216,11 +230,13 @@
       "Title: Advanced Perspectives on Freshness SLAs for Real-Time LLM Knowledge Augmentation\nAuthors: Bao Do, Linh Ngo\nPublished: 2025-06-04\nCategories: Data Management, Artificial Intelligence\nSummary: An extended empirical study on e define freshness service-level agreements (SLAs) for temporal document ingestion. By tracking document age and update cadence, our orchestrator dynamically prioritizes recrawling high-churn technical corpora Further analysis on scaling parameters."
     ],
     "retrieval_hit": false,
+    "average_precision": 0.0,
+    "reciprocal_rank": 0.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, listing both required categories."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -245,11 +261,13 @@
       "Title: Evaluating Retrieval Precision with Token F1 and LLM Judges\nAuthors: Tuan Phan, Mai Bui\nPublished: 2025-03-28\nCategories: Natural Language Processing, Evaluation Methodology\nSummary: Evaluating open-domain QA requires robust metrics. We benchmark semantic similarity, token-level overlap F1, and model-based judge verdicts to quantify RAG answer correctness across noisy corpus conditions. ### %% CORRUPTION_NOISE_7xQ @@@"
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the same summary without any deviation."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -274,11 +292,13 @@
       "Title: Advanced Perspectives on Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines\nAuthors: Quang Le, Yen Vu\nPublished: 2025-06-12\nCategories: Evaluation Methodology, Enterprise Systems\nSummary: An extended empirical study on tatic benchmarks fail to capture domain drift in enterprise knowledge bases. We establish a synthetic test generator that auto-creates paired evaluation sets whenever new corpora are ingested Further analysis on scaling parameters."
     ],
     "retrieval_hit": true,
+    "average_precision": 0.3333333333333333,
+    "reciprocal_rank": 0.3333333333333333,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct authors 'Son Nguyen, Thuy Doan'."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   }
 ]

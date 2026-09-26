@@ -8,9 +8,17 @@ from core.utils import write_text
 
 _SCORE_KEYS = (
     ("retrieval_hit_rate", "Retrieval Hit Rate"),
+    ("map", "Mean Average Precision (MAP)"),
+    ("mrr", "Mean Reciprocal Rank (MRR)"),
     ("mean_token_f1", "Mean Token F1"),
     ("judge_accuracy", "LLM Judge Accuracy"),
     ("mean_judge_score", "Mean LLM Judge Score"),
+)
+_RAGAS_KEYS = (
+    ("answer_relevancy", "Answer Relevancy"),
+    ("context_precision", "Context Precision"),
+    ("context_recall", "Context Recall"),
+    ("faithfulness", "Faithfulness"),
 )
 
 
@@ -20,7 +28,20 @@ def _format_value(value: Any, key: str = "") -> str:
     if isinstance(value, bool):
         return "PASS" if value else "FAIL"
     if isinstance(value, (int, float)):
-        if key in {"retrieval_hit_rate", "mean_token_f1", "judge_accuracy", "stale_ratio"}:
+        if key in {
+            "retrieval_hit_rate",
+            "map",
+            "mrr",
+            "mean_average_precision",
+            "mean_reciprocal_rank",
+            "mean_token_f1",
+            "judge_accuracy",
+            "answer_relevancy",
+            "context_precision",
+            "context_recall",
+            "faithfulness",
+            "stale_ratio",
+        }:
             return f"{value:.1%}"
         if key == "mean_judge_score":
             return f"{value:.2f} / 5"
@@ -34,6 +55,14 @@ def _quality_status(quality: dict[str, Any]) -> str:
     if engine != "great_expectations_1.x":
         status += f" (engine: {engine})"
     return status
+
+
+def _ragas_score(metrics: dict[str, Any], key: str) -> Any:
+    ragas = metrics.get("ragas", {})
+    if not isinstance(ragas, dict):
+        return None
+    scores = ragas.get("scores", {})
+    return scores.get(key) if isinstance(scores, dict) else None
 
 
 def generate_phase1_report(
@@ -71,7 +100,12 @@ def generate_phase1_report(
 
 Samples evaluated: **{_format_value(metrics.get('samples'))}**
 
-The LLM judge may use its recorded heuristic fallback when the configured provider is unavailable. See `baseline_answers.json` for per-question judge reasoning. Ragas: `{_format_value(metrics.get('ragas'))}`.
+The LLM judge may use its recorded heuristic fallback when the configured provider is unavailable. See `baseline_answers.json` for per-question judge reasoning.
+
+## RAGAS evaluation
+
+- Status: **{_format_value(metrics.get('ragas', {}).get('status') if isinstance(metrics.get('ragas'), dict) else None)}**
+{chr(10).join(f"- {label}: **{_format_value(_ragas_score(metrics, key), key)}**" for key, label in _RAGAS_KEYS)}
 
 ## Data quality gate
 
@@ -133,8 +167,22 @@ def generate_corruption_report(
                 _format_value(corrupted_freshness.get("is_fresh")),
                 _format_value(repaired_freshness.get("is_fresh")),
             ),
+            "| RAGAS Status | {} | {} | {} |".format(
+                _format_value((baseline_metrics.get("ragas") or {}).get("status")),
+                _format_value((corrupted_metrics.get("ragas") or {}).get("status")),
+                _format_value((repaired_metrics.get("ragas") or {}).get("status")),
+            ),
         ]
     )
+    for key, label in _RAGAS_KEYS:
+        rows.append(
+            "| RAGAS {} | {} | {} | {} |".format(
+                label,
+                _format_value(_ragas_score(baseline_metrics, key), key),
+                _format_value(_ragas_score(corrupted_metrics, key), key),
+                _format_value(_ragas_score(repaired_metrics, key), key),
+            )
+        )
 
     baseline_f1 = float(baseline_metrics.get("mean_token_f1", 0.0) or 0.0)
     corrupted_f1 = float(corrupted_metrics.get("mean_token_f1", 0.0) or 0.0)

@@ -8,6 +8,7 @@ import types
 from typing import Any
 
 from datasets import Dataset
+import pandas as pd
 from pydantic import BaseModel, Field
 
 from core.config import Settings
@@ -28,6 +29,33 @@ class JudgeVerdict(BaseModel):
 class EvaluationBundle:
     summary: dict[str, Any]
     answers: list[dict[str, Any]]
+
+
+def _reciprocal_rank(retrieved_doc_ids: list[str], relevant_doc_ids: list[str]) -> float:
+    """Return the reciprocal rank of the first relevant retrieved document."""
+    relevant = {str(doc_id) for doc_id in relevant_doc_ids}
+    for rank, doc_id in enumerate(retrieved_doc_ids, start=1):
+        if str(doc_id) in relevant:
+            return 1.0 / rank
+    return 0.0
+
+
+def _average_precision(retrieved_doc_ids: list[str], relevant_doc_ids: list[str]) -> float:
+    """Return average precision for a ranked list of retrieved documents."""
+    relevant = {str(doc_id) for doc_id in relevant_doc_ids}
+    if not relevant:
+        return 0.0
+
+    hits = 0
+    precision_sum = 0.0
+    matched: set[str] = set()
+    for rank, doc_id in enumerate(retrieved_doc_ids, start=1):
+        normalized_id = str(doc_id)
+        if normalized_id in relevant and normalized_id not in matched:
+            matched.add(normalized_id)
+            hits += 1
+            precision_sum += hits / rank
+    return precision_sum / len(relevant)
 
 
 def _token_f1(reference: str, prediction: str) -> float:
@@ -72,8 +100,15 @@ Return:
 
 def _run_ragas(settings: Settings, answers: list[dict[str, Any]]) -> dict[str, Any]:
     if os.getenv("RUN_RAGAS", "").lower() not in {"1", "true", "yes"}:
-        return {"skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."}
+        return {
+            "status": "skipped",
+            "enabled": False,
+            "message": "Set RUN_RAGAS=1 to enable the slower Ragas pass.",
+            "scores": {},
+        }
     try:
+        # Ragas 0.3 imports this optional module during package import, while
+        # langchain-community is not a direct project dependency.
         if "langchain_community.chat_models.vertexai" not in sys.modules:
             shim = types.ModuleType("langchain_community.chat_models.vertexai")
             shim.ChatVertexAI = type("ChatVertexAI", (), {})
@@ -94,10 +129,42 @@ def _run_ragas(settings: Settings, answers: list[dict[str, Any]]) -> dict[str, A
             metrics=[answer_relevancy, context_precision, context_recall, faithfulness],
             llm=build_llm(settings=settings, temperature=0.0),
             embeddings=MiniLMEmbeddings(settings.embedding_model),
+            column_map={
+                "user_input": "question",
+                "response": "answer",
+                "reference": "ground_truth",
+                "retrieved_contexts": "contexts",
+            },
+            raise_exceptions=False,
+            show_progress=False,
         )
-        return dict(result)
+        frame = result.to_pandas()
+        metric_names = (
+            "answer_relevancy",
+            "context_precision",
+            "context_recall",
+            "faithfulness",
+        )
+        scores: dict[str, float | None] = {}
+        for metric_name in metric_names:
+            if metric_name not in frame.columns:
+                scores[metric_name] = None
+                continue
+            values = pd.to_numeric(frame[metric_name], errors="coerce").dropna()
+            scores[metric_name] = float(values.mean()) if not values.empty else None
+        return {
+            "status": "ok",
+            "enabled": True,
+            "samples": int(len(frame)),
+            "scores": scores,
+        }
     except Exception as exc:  # pragma: no cover
-        return {"error": f"Ragas evaluation failed: {exc}"}
+        return {
+            "status": "error",
+            "enabled": True,
+            "scores": {},
+            "error": f"Ragas evaluation failed: {exc}",
+        }
 
 
 def evaluate_pipeline(
@@ -113,7 +180,15 @@ def evaluate_pipeline(
     for item in test_set:
         result = answer_question(item["question"], settings=settings, index=index)
         judge = _judge_answer(settings, item["question"], item["ground_truth"], result.answer)
-        retrieval_hit = any(doc_id in item["ground_truth_doc_ids"] for doc_id in result.retrieved_doc_ids)
+        average_precision = _average_precision(
+            result.retrieved_doc_ids,
+            item["ground_truth_doc_ids"],
+        )
+        reciprocal_rank = _reciprocal_rank(
+            result.retrieved_doc_ids,
+            item["ground_truth_doc_ids"],
+        )
+        retrieval_hit = reciprocal_rank > 0.0
         answers.append(
             {
                 "id": item["id"],
@@ -125,14 +200,22 @@ def evaluate_pipeline(
                 "retrieved_doc_ids": result.retrieved_doc_ids,
                 "retrieved_contexts": result.retrieved_contexts,
                 "retrieval_hit": retrieval_hit,
+                "average_precision": average_precision,
+                "reciprocal_rank": reciprocal_rank,
                 "token_f1": _token_f1(item["ground_truth"], result.answer),
                 "judge": judge.model_dump(),
             }
         )
 
+    map_score = mean(item["average_precision"] for item in answers) if answers else 0.0
+    mrr_score = mean(item["reciprocal_rank"] for item in answers) if answers else 0.0
     summary = {
         "samples": len(answers),
         "retrieval_hit_rate": mean(1.0 if item["retrieval_hit"] else 0.0 for item in answers),
+        "map": map_score,
+        "mrr": mrr_score,
+        "mean_average_precision": map_score,
+        "mean_reciprocal_rank": mrr_score,
         "mean_token_f1": mean(item["token_f1"] for item in answers),
         "judge_accuracy": mean(1.0 if item["judge"]["correct"] else 0.0 for item in answers),
         "mean_judge_score": mean(item["judge"]["score"] for item in answers),
