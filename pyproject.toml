@@ -23,7 +23,22 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest>=8.3.2",
+  "pytest-cov>=6.0.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/**/__init__.py"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true
 
 [build-system]
 requires = ["setuptools>=80.0.0"]

@@ -24,6 +24,13 @@ def build_llm(settings: Settings, temperature: float = 0.0):
             api_key=settings.openai_api_key,
             temperature=temperature,
         )
+    if provider == "groq":
+        return ChatOpenAI(
+            model=settings.model_name,
+            api_key=settings.groq_api_key,
+            base_url=settings.groq_base_url,
+            temperature=temperature,
+        )
     if provider == "anthropic":
         return ChatAnthropic(
             model=settings.model_name,

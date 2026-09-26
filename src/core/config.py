@@ -46,6 +46,8 @@ class Paths:
 class Settings:
     llm_provider: str
     model_name: str
+    groq_api_key: str | None
+    groq_base_url: str
     google_api_key: str | None
     openai_api_key: str | None
     anthropic_api_key: str | None
@@ -115,6 +117,8 @@ def load_settings(project_dir: Path | None = None) -> Settings:
     return Settings(
         llm_provider=os.getenv("LLM_PROVIDER", "gemini"),
         model_name=os.getenv("LLM_MODEL", "gemini-2.5-flash"),
+        groq_api_key=os.getenv("GROQ_API_KEY"),
+        groq_base_url=os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -141,6 +145,8 @@ def load_settings(project_dir: Path | None = None) -> Settings:
 
 def normalized_provider(settings: Settings) -> str:
     provider = settings.llm_provider.strip().lower().replace(" ", "").replace("-", "")
+    if provider in {"google", "googleai"}:
+        return "gemini"
     if provider == "anthorpic":
         return "anthropic"
     if provider == "customllm":
@@ -158,6 +164,10 @@ def require_llm_credentials(settings: Settings) -> None:
         if settings.openai_api_key:
             return
         raise RuntimeError("OPENAI_API_KEY is required when LLM_PROVIDER=openai.")
+    if provider == "groq":
+        if settings.groq_api_key:
+            return
+        raise RuntimeError("GROQ_API_KEY is required when LLM_PROVIDER=groq.")
     if provider == "anthropic":
         if settings.anthropic_api_key:
             return
@@ -173,5 +183,5 @@ def require_llm_credentials(settings: Settings) -> None:
             return
         raise RuntimeError("CUSTOM_LLM_BASE_URL is required when LLM_PROVIDER=custom.")
     raise RuntimeError(
-        "Unsupported LLM_PROVIDER. Expected one of: openai, gemini, anthropic, openrouter, ollama, custom, mock."
+        "Unsupported LLM_PROVIDER. Expected one of: openai, groq, gemini, anthropic, openrouter, ollama, custom, mock."
     )
