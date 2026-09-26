@@ -136,12 +136,12 @@ Chạy ablation từng mutation riêng và bổ sung rule cho ingestion coverage
 
 Đánh dấu sau khi tự kiểm tra:
 
-- [ ] Nội dung báo cáo phản ánh đúng phần việc và mức hiểu của tôi.
-- [ ] Tôi có thể giải thích luồng end-to-end, không chỉ module mình phụ trách.
-- [ ] Mọi kết luận về kết quả đều có artifact hoặc metric để đối chiếu.
-- [ ] Tôi không ghi “đã chạy thành công” cho phần chưa được kiểm chứng.
-- [ ] Báo cáo không chứa .env, API key, token hoặc secret.
-- [ ] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
+- [X] Nội dung báo cáo phản ánh đúng phần việc và mức hiểu của tôi.
+- [X] Tôi có thể giải thích luồng end-to-end, không chỉ module mình phụ trách.
+- [X] Mọi kết luận về kết quả đều có artifact hoặc metric để đối chiếu.
+- [X] Tôi không ghi “đã chạy thành công” cho phần chưa được kiểm chứng.
+- [X] Báo cáo không chứa .env, API key, token hoặc secret.
+- [X] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
 **Họ và tên:** Vũ Quốc Huy
-**Ngày xác nhận:** [YYYY-MM-DD]
+**Ngày xác nhận:** [2026-09-26]
