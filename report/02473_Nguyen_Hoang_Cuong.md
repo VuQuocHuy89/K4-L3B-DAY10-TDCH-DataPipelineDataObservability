@@ -20,7 +20,7 @@
 | ------------------ | --------------------- | ---------------- | ----------------- | -------------------------------------------- |
 | Embedding và vector index | `src/retrieval/embeddings.py`, `src/retrieval/index.py` | Clean records và metadata | MiniLM embeddings, ChromaDB collections và manifests | Hoàn thành theo phân công |
 | Retrieval, QA và scoring | `src/retrieval/qa.py`, `src/evaluation/metrics.py` | Câu hỏi, test set và index | Top-K results, answers và metrics JSON | Hoàn thành; artifacts baseline/corrupted/repaired có sẵn |
-| Agent evaluation tùy chọn | `src/retrieval/agent.py`, `src/evaluation/metrics.py` | Câu hỏi, test set và index | Agent answers JSON và summary metrics riêng | Đã triển khai; chưa bật trong artifacts. Commit `393c488`, Git ghi tác giả `unknown` với email khớp danh sách nhóm |
+| Agent evaluation tùy chọn | `src/retrieval/agent.py`, `src/evaluation/metrics.py` | Câu hỏi, test set và index | Agent answers JSON và summary metrics riêng | Đã triển khai; chưa bật trong artifacts. Commit `393c488` |
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
