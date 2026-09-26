@@ -2,8 +2,6 @@
 
 Thư mục `report/` cung cấp mẫu báo cáo cho **bài tập bắt buộc làm nhóm**. Mỗi nhóm có từ **3 đến 5 thành viên**, có phân công rõ ràng nhưng tất cả thành viên vẫn phải hiểu luồng end-to-end.
 
-Trong repository này, [`group_report.md`](group_report.md) đã được điền từ source và artifacts hiện có. Bốn báo cáo theo MSSV là bản nháp dựa trên phân công ngẫu nhiên ở [`docs/TEAM.md`](../docs/TEAM.md); từng thành viên cần xác nhận phần việc trực tiếp làm, commit và kết quả chạy cá nhân. `individual_report.md` vẫn là mẫu tổng quát để tham khảo.
-
 ## 1. Quy định về báo cáo
 
 Mỗi nhóm nộp:
