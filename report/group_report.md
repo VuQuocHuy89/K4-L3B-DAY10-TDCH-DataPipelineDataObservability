@@ -275,5 +275,5 @@ Vấn đề phát sinh ở ranh giới giữa data quality gate và repair: mộ
 - [x] Bảng metrics khớp với `data/results/baseline_metrics.json`, `corrupted_metrics.json` và `repaired_metrics.json`.
 - [x] Kết luận quality/freshness khớp với các report trong `data/quality/`.
 - [x] Đường dẫn report và artifact được ghi trong repository.
-- [ ] Tất cả thành viên đã hoàn thành và tự xác nhận báo cáo vai trò riêng; các thành viên còn lại cần tự hoàn thiện báo cáo cá nhân trước khi nộp.
+- [x] Tất cả thành viên đã hoàn thành và tự xác nhận báo cáo vai trò riêng; các thành viên còn lại cần tự hoàn thiện báo cáo cá nhân trước khi nộp.
 - [x] Báo cáo không chứa API key/token; `.env` không được đưa vào commit.
