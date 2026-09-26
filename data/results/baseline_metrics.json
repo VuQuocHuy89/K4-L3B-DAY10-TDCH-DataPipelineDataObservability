@@ -8,6 +8,12 @@
   "mean_token_f1": 1.0,
   "judge_accuracy": 1.0,
   "mean_judge_score": 5,
+  "agent_evaluation": {
+    "status": "skipped",
+    "enabled": false,
+    "message": "Set RUN_AGENT_EVALUATION=1 to evaluate the LangChain agent.",
+    "scores": {}
+  },
   "ragas": {
     "status": "skipped",
     "enabled": false,

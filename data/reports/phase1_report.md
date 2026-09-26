@@ -9,19 +9,31 @@
 | Raw Records Loaded | 24 |
 | Clean Records Indexed | 24 |
 | Evaluation Questions | 10 |
+| Auto Repair Triggered | FAIL |
+| Auto Repair Source | not_needed |
 
 ## Baseline evaluation
 
 | Metric | Result |
 | --- | ---: |
 | Retrieval Hit Rate | 100.0% |
+| Mean Average Precision (MAP) | 100.0% |
+| Mean Reciprocal Rank (MRR) | 100.0% |
 | Mean Token F1 | 100.0% |
 | LLM Judge Accuracy | 100.0% |
 | Mean LLM Judge Score | 5.00 / 5 |
 
 Samples evaluated: **10**
 
-The LLM judge may use its recorded heuristic fallback when the configured provider is unavailable. See `baseline_answers.json` for per-question judge reasoning. Ragas: `{'skipped': 'Set RUN_RAGAS=1 to enable the slower Ragas pass.'}`.
+The LLM judge may use its recorded heuristic fallback when the configured provider is unavailable. See `baseline_answers.json` for per-question judge reasoning.
+
+## RAGAS evaluation
+
+- Status: **skipped**
+- Answer Relevancy: **N/A**
+- Context Precision: **N/A**
+- Context Recall: **N/A**
+- Faithfulness: **N/A**
 
 ## Data quality gate
 

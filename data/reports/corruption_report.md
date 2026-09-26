@@ -2,6 +2,13 @@
 
 The corruption flow starts from the same cleaned baseline on every run, records six controlled mutations in `data/results/corruption_log.json`, and reconstructs the repaired corpus from `data/raw/crossref_records.json`.
 
+## Automated self-healing
+
+- Triggered: **PASS**
+- Reasons: **quality:ExpectColumnValuesToBeUnique, quality:ExpectColumnValueLengthsToBeBetween, quality:freshness**
+- Repair source: **raw_snapshot**
+- Repair log: `F:\UIT\AITC\Lab10\K4-L3B-DAY10-TDCH-DataPipelineDataObservability\data\results\repair_log.json`
+
 ## Three-state comparison
 
 | Metric | Baseline | Corrupted | Repaired |
@@ -15,7 +22,7 @@ The corruption flow starts from the same cleaned baseline on every run, records 
 | Samples | 10 | 10 | 10 |
 | GX + Freshness Gate | Baseline report (see phase 1) | FAIL | PASS |
 | Freshness SLA | See baseline report | FAIL | PASS |
-| RAGAS Status | skipped | error | error |
+| RAGAS Status | skipped | skipped | skipped |
 | RAGAS Answer Relevancy | N/A | N/A | N/A |
 | RAGAS Context Precision | N/A | N/A | N/A |
 | RAGAS Context Recall | N/A | N/A | N/A |

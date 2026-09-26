@@ -22,6 +22,7 @@
 | ------------------ | --------------------- | ---------------- | ----------------- | -------------------------------------------- |
 | Bổ sung metric retrieval ranking | `src/evaluation/metrics.py`: `_average_precision`, `_reciprocal_rank`, `evaluate_pipeline` | Evaluation set, `retrieved_doc_ids`, `ground_truth_doc_ids` | `map`, `mrr`, `mean_average_precision`, `mean_reciprocal_rank` trong các file metrics | Hoàn thành |
 | Tích hợp RAGAS và xuất kết quả | `src/evaluation/metrics.py`, `src/pipelines/phase1.py`, `src/pipelines/corruption_flow.py`, `src/observability/reporting.py` | Câu hỏi, câu trả lời, ground truth và retrieved contexts | Bốn điểm RAGAS, trạng thái chạy và bảng Baseline/Corrupted/Repaired | Hoàn thành phần code; RAGAS score chưa chạy được |
+| Automated self-healing / Auto-Repair | `src/pipelines/repair.py`, `src/pipelines/phase1.py`, `src/pipelines/corruption_flow.py` | Quality Gate, Freshness SLA và raw snapshot | Tự động rollback/rebuild, kiểm tra lại và `data/results/repair_log.json` | Hoàn thành |
 | Bổ sung dependency cho RAGAS | `requirements.txt`, `pyproject.toml` | Dependency của RAGAS | `pillow>=10.0.0` | Hoàn thành |
 
 Chỉ nhận ownership cho phần bạn trực tiếp thực hiện. Liên hệ rõ phần việc của bạn với đầu vào, đầu ra và các thành viên phụ thuộc vào phần đó.
@@ -39,22 +40,25 @@ Chỉ nhận ownership cho phần bạn trực tiếp thực hiện. Liên hệ 
 | Bổ sung Average Precision và Reciprocal Rank cho từng câu hỏi, sau đó lấy trung bình thành MAP/MRR | `src/evaluation/metrics.py`, `data/results/*_metrics.json` | Baseline MAP/MRR 100%; Corrupted 53.3%; Repaired 100% | Kiểm tra công thức với các trường hợp hạng 1, hạng 2 và không tìm thấy tài liệu |
 | Bổ sung RAGAS theo cơ chế opt-in và lưu bốn metric thành phần | `src/evaluation/metrics.py`, `data/reports/corruption_report.md` | Có các trường `answer_relevancy`, `context_precision`, `context_recall`, `faithfulness`; trạng thái lỗi được lưu thay vì làm dừng pipeline | Chạy với `RUN_RAGAS=1`; artifact hiện ghi thiếu `GOOGLE_API_KEY` |
 | Hiển thị MAP/MRR/RAGAS trong các script | `src/pipelines/phase1.py`, `src/pipelines/corruption_flow.py`, `src/observability/reporting.py` | Console và comparison report có đủ MAP, MRR và trạng thái RAGAS | Đối chiếu output console và `data/reports/corruption_report.md` |
+| Bổ sung auto-repair có điều kiện | `src/pipelines/repair.py`, `data/results/repair_log.json` | Khi Quality/Freshness fail, tự đọc raw snapshot hoặc fallback refetch, clean và validate lại | Log ghi `triggered=true`, `source=raw_snapshot`, 24 dòng sau repair, Quality/Freshness PASS |
 
 Nêu một output cụ thể mà phần việc của bạn tạo ra hoặc giúp xác minh:
 
-Artifact chính là `data/results/baseline_metrics.json`, `data/results/corrupted_metrics.json`, `data/results/repaired_metrics.json` và `data/reports/corruption_report.md`. Trên cùng test set 10 câu, MAP/MRR lần lượt là `100.0% / 53.3% / 100.0%` cho Baseline/Corrupted/Repaired.
+Artifact chính là `data/results/baseline_metrics.json`, `data/results/corrupted_metrics.json`, `data/results/repaired_metrics.json`, `data/results/repair_log.json` và `data/reports/corruption_report.md`. Trên cùng test set 10 câu, MAP/MRR lần lượt là `100.0% / 53.3% / 100.0%` cho Baseline/Corrupted/Repaired. Auto-repair được kích hoạt khi corrupted Quality/Freshness fail và phục hồi 24 dòng từ raw snapshot.
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
 ### Vấn đề cần giải quyết
 
-Các metric ban đầu chỉ cho biết có tìm thấy tài liệu đúng hay không và chất lượng câu trả lời. Phần Evaluation bổ sung các metric có xét thứ hạng tài liệu trả về (MAP, MRR), đồng thời tích hợp RAGAS để đánh giá answer relevancy, context precision, context recall và faithfulness. Mục tiêu là phân biệt rõ lỗi retrieval ranking với lỗi sinh câu trả lời.
+Các metric ban đầu chỉ cho biết có tìm thấy tài liệu đúng hay không và chất lượng câu trả lời. Phần Evaluation bổ sung các metric có xét thứ hạng tài liệu trả về (MAP, MRR), đồng thời tích hợp RAGAS để đánh giá answer relevancy, context precision, context recall và faithfulness. Ngoài ra, pipeline cần tự phát hiện Quality/Freshness fail và tự phục hồi dữ liệu mà không cần người dùng gọi thủ công hàm repair. Mục tiêu là phân biệt rõ lỗi retrieval ranking, lỗi sinh câu trả lời và khả năng tự phục hồi của pipeline.
 
 ### Cách triển khai
 
 Với mỗi câu hỏi, `retrieved_doc_ids` được xem là danh sách đã xếp hạng và `ground_truth_doc_ids` là tập tài liệu đúng. Average Precision cộng precision tại các vị trí có tài liệu liên quan rồi chia cho số tài liệu liên quan; Reciprocal Rank lấy `1/rank` của tài liệu đúng đầu tiên. MAP và MRR là trung bình các giá trị đó trên 10 câu hỏi.
 
 RAGAS được bật có điều kiện bằng biến môi trường `RUN_RAGAS=1`. Pipeline ánh xạ các cột nội bộ sang schema RAGAS, chạy bốn metric, lấy trung bình theo toàn bộ câu hỏi và lưu cả `status`, `scores`, `error` nếu dependency hoặc credential chưa sẵn sàng. Khi không bật cờ, RAGAS ở trạng thái `skipped` để không làm chậm các lần chạy MAP/MRR thông thường.
+
+Auto-repair được đóng gói trong `auto_repair_if_needed`. Hàm nhận kết quả Quality Gate và Freshness SLA, tạo danh sách lý do lỗi, rồi chỉ kích hoạt khi có expectation hoặc freshness violation. Nguồn rollback ưu tiên `data/raw/crossref_records.json`; nếu raw snapshot không đọc được, pipeline dùng `fetch_source_records` để refetch hoặc lấy offline snapshot. Dữ liệu sau repair phải được clean và validate lại trước khi được index/evaluate. Mỗi lần repair được ghi vào `data/results/repair_log.json`.
 
 ### Input, output và contract
 
@@ -64,20 +68,21 @@ RAGAS được bật có điều kiện bằng biến môi trường `RUN_RAGAS=
 | Output                         | Per-question `average_precision`, `reciprocal_rank`; summary `map`, `mrr`; RAGAS `status` và `scores` |
 | Module phụ thuộc             | `retrieval.qa`, `retrieval.index`, `retrieval.llm`, `retrieval.embeddings`                    |
 | Module sử dụng output        | `phase1.py`, `corruption_flow.py`, `reporting.py`, các file trong `data/results/`        |
-| Điều kiện lỗi cần xử lý | Không có tài liệu đúng; danh sách rỗng; RAGAS chưa bật; thiếu Pillow, model embedding hoặc credential LLM |
+| Điều kiện lỗi cần xử lý | Không có tài liệu đúng; danh sách rỗng; Quality/Freshness fail; raw snapshot lỗi; RAGAS chưa bật; thiếu model hoặc credential LLM |
 
 ### Cách xác minh
 
 ```bash
 $env:PYTHONPATH = "src"
-python -m py_compile src/evaluation/metrics.py src/observability/reporting.py src/pipelines/phase1.py src/pipelines/corruption_flow.py
+python -m py_compile src/evaluation/metrics.py src/observability/reporting.py src/pipelines/repair.py src/pipelines/phase1.py src/pipelines/corruption_flow.py
 python script/run_phase1.py
 python script/run_corruption_flow.py
+Get-Content data/results/repair_log.json
 ```
 
-- **Kết quả mong đợi:** Ba trạng thái dùng cùng evaluation set và console/report hiển thị Hit Rate, MAP, MRR, Token F1, LLM Judge Accuracy và RAGAS status.
-- **Kết quả thực tế:** Kiểm tra công thức MAP/MRR đạt; Baseline `100%/100%`, Corrupted `53.3%/53.3%`, Repaired `100%/100%`. RAGAS chưa có điểm số thật vì lần bật RAGAS thiếu `GOOGLE_API_KEY`; lỗi được ghi trong metrics thay vì làm mất kết quả cũ.
-- **Artifact/log:** `data/results/baseline_metrics.json`, `data/results/corrupted_metrics.json`, `data/results/repaired_metrics.json`, `data/reports/corruption_report.md`.
+- **Kết quả mong đợi:** Ba trạng thái dùng cùng evaluation set và console/report hiển thị Hit Rate, MAP, MRR, Token F1, LLM Judge Accuracy, RAGAS status và Auto-repair status.
+- **Kết quả thực tế:** Kiểm tra công thức MAP/MRR đạt; Baseline `100%/100%`, Corrupted `53.3%/53.3%`, Repaired `100%/100%`. Auto-repair được trigger bởi duplicate, summary length và freshness, sau đó khôi phục 24 dòng và Quality/Freshness đều PASS. RAGAS chưa có điểm số thật vì lần bật RAGAS thiếu `GOOGLE_API_KEY`; lỗi được ghi trong metrics thay vì làm mất kết quả cũ.
+- **Artifact/log:** `data/results/baseline_metrics.json`, `data/results/corrupted_metrics.json`, `data/results/repaired_metrics.json`, `data/results/repair_log.json`, `data/reports/corruption_report.md`.
 
 ## 5. Một quyết định kỹ thuật quan trọng
 
@@ -86,6 +91,7 @@ python script/run_corruption_flow.py
 - **Phương án đã chọn:** Giữ Hit Rate và Token F1, bổ sung MAP/MRR từ document ID; RAGAS chạy opt-in bằng `RUN_RAGAS=1`.
 - **Lý do:** MAP/MRR có tính tái lập, không phụ thuộc LLM và phản ánh vị trí tài liệu đúng. RAGAS cung cấp đánh giá ngữ nghĩa nhưng tốn thời gian, cần model/credential và có thể phát sinh chi phí.
 - **Bằng chứng quyết định phù hợp:** Khi corruption làm hỏng ranking, MAP/MRR giảm từ `100%` xuống `53.3%`; khi repair từ raw snapshot, cả hai phục hồi về `100%`.
+- **Bằng chứng cho self-healing:** `repair_log.json` ghi `triggered=true`, nguồn `raw_snapshot`, `output_rows=24`, `quality_success=true` và `freshness_success=true`.
 
 ## 6. Một lỗi hoặc blocker đã xử lý
 
@@ -95,6 +101,10 @@ python script/run_corruption_flow.py
 - **Cách xử lý:** Tính lại từ `baseline_answers.json`, đồng bộ baseline artifact và yêu cầu chạy lại Phase 1 trước Corruption Flow sau mỗi thay đổi schema metric.
 - **Cách xác minh sau khi sửa:** 10/10 câu có tài liệu đúng ở hạng 1; baseline MAP/MRR là `1.0/1.0`, repaired cũng là `1.0/1.0`.
 - **Điều học được:** Artifact sinh ra từ phiên bản code cũ có thể làm report sai dù code mới đúng; phải kiểm tra schema và thời điểm tạo metric trước khi kết luận.
+
+- **Vấn đề Auto-Repair trước khi bổ sung:** Code cũ luôn gọi repair sau corruption nhưng không dùng kết quả Quality/Freshness để quyết định, nên đó là repair cố định chứ chưa phải self-healing có điều kiện.
+- **Cách xử lý:** Thêm `auto_repair_if_needed`, chỉ trigger khi gate fail, ưu tiên rollback từ raw snapshot, fallback refetch/snapshot, validate lại trước index và ghi audit log.
+- **Cách xác minh:** Test trên corrupted report cho thấy hàm phát hiện duplicate, summary length và freshness; repair tạo 24 dòng sạch và cả hai gate đạt PASS.
 
 Nếu chưa xử lý xong:
 
@@ -122,7 +132,7 @@ Quality checks kiểm tra điều kiện dữ liệu tại một thời điểm,
 
 Phải dùng cùng test set để baseline, corrupted và repaired vì nếu câu hỏi hoặc ground truth thay đổi thì chênh lệch metric không còn phản ánh riêng tác động của corruption.
 
-Repair thành công khi raw snapshot tạo lại được cleaned dataset hợp lệ, quality/freshness trở lại PASS, đồng thời các metric retrieval/answer phục hồi về gần baseline. Trong kết quả này MAP, MRR, Hit Rate và Token F1 đều phục hồi về `100%`.
+Repair thành công khi Quality/Freshness fail được phát hiện, auto-repair tự đọc raw snapshot, tạo lại cleaned dataset hợp lệ, validate PASS rồi mới index/evaluate. Trong kết quả này `repair_log.json` xác nhận trigger và 24 dòng sau repair; MAP, MRR, Hit Rate và Token F1 đều phục hồi về `100%`.
 
 ## 8. Phân tích kết quả
 
@@ -137,6 +147,7 @@ Repair thành công khi raw snapshot tạo lại được cleaned dataset hợp 
 | `judge_accuracy`     | 100.0% | 70.0% | 100.0% | LLM judge/fallback đánh giá 3/10 câu corrupted là không đúng hoàn toàn. |
 | `mean_judge_score`   | 5.00/5 | 3.80/5 | 5.00/5 | Repair khôi phục chất lượng câu trả lời. |
 | RAGAS status         | skipped | error | error | Chưa có điểm RAGAS; baseline chưa bật, corrupted/repaired thiếu credential LLM. |
+| Auto-repair status   | NOT NEEDED | TRIGGERED | PASS | Corrupted gate fail kích hoạt rollback từ raw snapshot; dữ liệu sau repair đạt cả hai gate. |
 | Quality checks         | PASS | FAIL | PASS | Corrupted vi phạm uniqueness và summary length. |
 | Freshness status       | PASS | FAIL | PASS | Baseline stale `1/24 = 4.17%`; corrupted `23/23 = 100%`. |
 
@@ -145,7 +156,7 @@ Repair thành công khi raw snapshot tạo lại được cleaned dataset hợp 
 Hoàn thành hai chuỗi nguyên nhân–bằng chứng sau:
 
 1. Corruption gồm drop record, blank summary, inject noise, truncate title, stale date và duplicate rows → Quality Gate phát hiện duplicate/summary ngắn, freshness chuyển FAIL với `23/23` stale → Hit Rate giảm `100% → 60%`, MAP/MRR giảm `100% → 53.3%`, Token F1 giảm `100% → 70%`.
-2. Repair đọc lại raw snapshot thay vì sửa trên corrupted frame → quality/freshness trở lại PASS → Hit Rate, MAP, MRR và Token F1 phục hồi về `100%`; LLM Judge Accuracy cũng trở lại `100%`.
+2. Quality/Freshness fail → `auto_repair_if_needed` tự đọc raw snapshot và rebuild → quality/freshness trở lại PASS → Hit Rate, MAP, MRR và Token F1 phục hồi về `100%`; LLM Judge Accuracy cũng trở lại `100%`.
 
 Corruption nào ảnh hưởng rõ nhất và vì sao?
 
@@ -161,7 +172,7 @@ Kết quả ban đầu dễ gây hiểu nhầm là baseline MAP/MRR bằng 0 dù
 
 1. Metric phải đi cùng version/schema của artifact; chạy pipeline theo đúng thứ tự và cùng evaluation set là điều kiện để so sánh có ý nghĩa.
 2. Quality Gate phát hiện lỗi cấu trúc còn freshness phát hiện lỗi thời gian; cả hai bổ sung cho nhau.
-3. Dữ liệu hỏng không nhất thiết làm hệ thống crash nhưng có thể làm giảm ranking và chất lượng câu trả lời RAG rõ rệt.
+3. Dữ liệu hỏng không nhất thiết làm hệ thống crash nhưng có thể làm giảm ranking và chất lượng câu trả lời RAG rõ rệt; auto-repair cần có trigger, validation và audit log để chứng minh phục hồi thật sự.
 
 ### Nếu có thêm thời gian
 

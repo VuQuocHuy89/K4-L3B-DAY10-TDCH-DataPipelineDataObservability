@@ -139,7 +139,9 @@ def generate_corruption_report(
     repaired_quality: dict[str, Any],
     corrupted_freshness: dict[str, Any],
     repaired_freshness: dict[str, Any],
+    repair_info: dict[str, Any] | None = None,
 ) -> None:
+    repair_info = repair_info or {}
     rows: list[str] = []
     for key, label in _SCORE_KEYS:
         rows.append(
@@ -200,6 +202,13 @@ def generate_corruption_report(
     content = f"""# Corruption and Idempotent Repair Report
 
 The corruption flow starts from the same cleaned baseline on every run, records six controlled mutations in `data/results/corruption_log.json`, and reconstructs the repaired corpus from `data/raw/crossref_records.json`.
+
+## Automated self-healing
+
+- Triggered: **{_format_value(repair_info.get('triggered'))}**
+- Reasons: **{_format_value(', '.join(repair_info.get('reasons', [])) or 'No quality/freshness violation')}**
+- Repair source: **{_format_value(repair_info.get('source') or 'Not applicable')}**
+- Repair log: `{_format_value(repair_info.get('log_path') or 'Not generated')}`
 
 ## Three-state comparison
 

@@ -21,11 +21,13 @@
       "Title: Hybrid Search Architectures: Combining BM25 with Dense Representations\nAuthors: Dat Tran, Lan Pham\nPublished: 2026-05-14\nCategories: Information Retrieval, Algorithms\nSummary: Dense vector search excels at conceptual similarity but struggles with exact acronyms and serial numbers. Reciprocal Rank Fusion of sparse lexical scores and dense embeddings achieves optimal recall."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the same summary of the paper."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -50,11 +52,13 @@
       "Title: Advanced Perspectives on Automated Data Quality Profiling with Great Expectations in CI/CD\nAuthors: Son Nguyen, Thuy Doan\nPublished: 2026-06-10\nCategories: Data Quality, DevOps\nSummary: An extended empirical study on mbedding quality checks directly into data pipelines enables fail-closed governance. We show how Great Expectations suites catch schema drifts and null fields before documents reach the embedding model Further analysis on scaling parameters."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct authors Anh Tran and Quoc Pham."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -79,11 +83,13 @@
       "Title: Advanced Perspectives on Hybrid Search Architectures: Combining BM25 with Dense Representations\nAuthors: Dat Tran, Lan Pham\nPublished: 2026-06-11\nCategories: Information Retrieval, Algorithms\nSummary: An extended empirical study on ense vector search excels at conceptual similarity but struggles with exact acronyms and serial numbers. Reciprocal Rank Fusion of sparse lexical scores and dense embeddings achieves optimal recall Further analysis on scaling parameters."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer (2026-04-18), so it is materially correct."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -108,11 +114,13 @@
       "Title: Advanced Perspectives on Semantic Layer Integration for Agentic Text-to-SQL Pipelines\nAuthors: Huy Dinh, Trang Vo\nPublished: 2026-06-06\nCategories: Databases, Information Systems\nSummary: An extended empirical study on onnecting LLMs directly to raw warehouse tables often results in schema misunderstandings. A governed semantic layer standardizes business metric definitions, dramatically boosting SQL generation accuracy Further analysis on scaling parameters."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, listing both categories correctly."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -137,11 +145,13 @@
       "Title: Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines\nAuthors: Quang Le, Yen Vu\nPublished: 2026-07-22\nCategories: Evaluation Methodology, Enterprise Systems\nSummary: Static benchmarks fail to capture domain drift in enterprise knowledge bases. We establish a synthetic test generator that auto-creates paired evaluation sets whenever new corpora are ingested."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct summary of the paper."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -166,11 +176,13 @@
       "Title: Agentic Retrieval-Augmented Generation for Knowledge-Intensive Tasks\nAuthors: Minh Nguyen, Hoang Le\nPublished: 2026-05-20\nCategories: Artificial Intelligence, Information Retrieval\nSummary: Retrieval-Augmented Generation (RAG) significantly improves large language model accuracy by grounding responses in retrieved passages. We explore agentic multi-hop reasoning and routing across heterogeneous vector indices."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct authors Huy Dinh and Trang Vo."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -195,11 +207,13 @@
       "Title: Data Observability and Quality Gates for Production RAG Systems\nAuthors: Anh Tran, Quoc Pham\nPublished: 2026-06-12\nCategories: Software Engineering, Data Systems\nSummary: Silent data corruption in RAG pipelines degrades LLM answer faithfulness without throwing runtime errors. We introduce automated quality gates using Great Expectations 1.x to catch stale and malformed embeddings before serving."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer (2026-06-25), so it is materially correct."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -224,11 +238,13 @@
       "Title: Advanced Perspectives on Freshness SLAs for Real-Time LLM Knowledge Augmentation\nAuthors: Bao Do, Linh Ngo\nPublished: 2026-06-04\nCategories: Data Management, Artificial Intelligence\nSummary: An extended empirical study on e define freshness service-level agreements (SLAs) for temporal document ingestion. By tracking document age and update cadence, our orchestrator dynamically prioritizes recrawling high-churn technical corpora Further analysis on scaling parameters."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, listing both required categories."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -253,11 +269,13 @@
       "Title: Continuous Benchmark Evaluation for Enterprise Retrieval Pipelines\nAuthors: Quang Le, Yen Vu\nPublished: 2026-07-22\nCategories: Evaluation Methodology, Enterprise Systems\nSummary: Static benchmarks fail to capture domain drift in enterprise knowledge bases. We establish a synthetic test generator that auto-creates paired evaluation sets whenever new corpora are ingested."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the same summary without any deviation."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   },
   {
@@ -282,11 +300,13 @@
       "Title: Data Observability and Quality Gates for Production RAG Systems\nAuthors: Anh Tran, Quoc Pham\nPublished: 2026-06-12\nCategories: Software Engineering, Data Systems\nSummary: Silent data corruption in RAG pipelines degrades LLM answer faithfulness without throwing runtime errors. We introduce automated quality gates using Great Expectations 1.x to catch stale and malformed embeddings before serving."
     ],
     "retrieval_hit": true,
+    "average_precision": 1.0,
+    "reciprocal_rank": 1.0,
     "token_f1": 1.0,
     "judge": {
       "score": 5,
       "correct": true,
-      "reasoning": "The model answer exactly matches the reference answer, providing the correct authors 'Son Nguyen, Thuy Doan'."
+      "reasoning": "Fallback heuristic judge used because the LLM evaluator was unavailable."
     }
   }
 ]

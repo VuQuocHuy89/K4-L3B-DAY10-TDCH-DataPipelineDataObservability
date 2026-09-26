@@ -3,14 +3,13 @@ from __future__ import annotations
 import pandas as pd
 
 from core.config import load_settings
-from core.utils import now_utc, read_json, write_csv, write_json
+from core.utils import read_json, write_csv, write_json
 from evaluation.metrics import evaluate_pipeline
-from ingestion.cleaning import build_clean_dataframe
 from ingestion.corruption import corrupt_clean_dataframe
-from ingestion.crossref import load_raw_records
 from observability.quality import build_freshness_report, run_data_quality_checks
 from observability.reporting import generate_corruption_report
 from retrieval.index import LocalEmbeddingIndex
+from pipelines.repair import auto_repair_if_needed
 
 
 def _load_clean_frame(path) -> pd.DataFrame:
@@ -80,16 +79,28 @@ def main() -> None:
         settings.paths.corrupted_answers,
     )
 
-    # Repair always starts from the preserved raw records, never the corrupted frame.
-    raw_records = load_raw_records(settings.paths.raw_records_json)
-    repaired_df = build_clean_dataframe(raw_records, now_utc())
-    if repaired_df.empty:
-        raise RuntimeError("Repair from the raw backup produced no valid records.")
+    # The quality/freshness gate now triggers repair automatically. The corrupted
+    # frame remains indexed above so the degradation is still measurable.
+    repair_result = auto_repair_if_needed(
+        settings,
+        corrupted_quality,
+        corrupted_freshness,
+        report_name="repaired",
+    )
+    if repair_result.triggered:
+        repaired_df = repair_result.dataframe
+        repaired_quality = repair_result.quality
+        repaired_freshness = repair_result.freshness
+    else:
+        # A clean gate means no rollback is warranted. Preserve that outcome in
+        # the repaired state instead of silently changing the data.
+        repaired_df = corrupted_df.copy(deep=True)
+        repaired_quality = run_data_quality_checks(repaired_df, settings, "repaired")
+        repaired_freshness = build_freshness_report(repaired_df, settings, report_path=None)
+    if repaired_df is None or repaired_df.empty:
+        raise RuntimeError("Automatic repair produced no valid records.")
     write_csv(repaired_df, settings.paths.repaired_clean_csv)
     write_json(settings.paths.repaired_clean_json, repaired_df.to_dict(orient="records"))
-
-    repaired_quality = run_data_quality_checks(repaired_df, settings, "repaired")
-    repaired_freshness = build_freshness_report(repaired_df, settings, report_path=None)
     repaired_index = LocalEmbeddingIndex.build(
         repaired_df,
         settings,
@@ -112,7 +123,16 @@ def main() -> None:
         repaired_quality,
         corrupted_freshness,
         repaired_freshness,
+        {
+            "triggered": repair_result.triggered,
+            "reasons": repair_result.reasons,
+            "source": repair_result.source,
+            "log_path": str(repair_result.log_path) if repair_result.log_path else None,
+        },
     )
     _print_comparison(baseline_metrics, corrupted_bundle.summary, repaired_bundle.summary)
+    print(f"Auto-repair triggered: {repair_result.triggered}")
+    if repair_result.log_path:
+        print(f"Auto-repair log: {repair_result.log_path}")
     print(f"Corruption log: {settings.paths.corruption_log}")
     print(f"Comparison report: {settings.paths.comparison_report}")

@@ -1,0 +1,16 @@
+{
+  "triggered": true,
+  "status": "repaired",
+  "reasons": [
+    "quality:ExpectColumnValuesToBeUnique",
+    "quality:ExpectColumnValueLengthsToBeBetween",
+    "quality:freshness"
+  ],
+  "input_quality_success": false,
+  "input_freshness_success": false,
+  "report_name": "repaired",
+  "source": "raw_snapshot",
+  "output_rows": 24,
+  "quality_success": true,
+  "freshness_success": true
+}

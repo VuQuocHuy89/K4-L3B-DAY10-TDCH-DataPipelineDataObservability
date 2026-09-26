@@ -10,6 +10,7 @@ from ingestion.cleaning import build_clean_dataframe
 from ingestion.crossref import fetch_source_records
 from observability.quality import build_freshness_report, run_data_quality_checks
 from observability.reporting import generate_phase1_report
+from pipelines.repair import auto_repair_if_needed
 from retrieval.index import LocalEmbeddingIndex
 
 
@@ -32,10 +33,24 @@ def main() -> None:
             "Great Expectations 1.x could not run; the quality report contains a fallback diagnostic. "
             f"Install project dependencies and inspect {settings.paths.baseline_quality_report}."
         )
+    auto_repair = auto_repair_if_needed(
+        settings,
+        quality,
+        freshness,
+        report_name="baseline",
+    )
+    if auto_repair.triggered:
+        clean_df = auto_repair.dataframe
+        quality = auto_repair.quality
+        freshness = auto_repair.freshness
+        if clean_df is None:
+            raise RuntimeError("Automatic baseline repair returned no dataframe.")
+        write_csv(clean_df, settings.paths.clean_csv)
+        write_json(settings.paths.clean_json, clean_df.to_dict(orient="records"))
     if not quality["success"]:
         failed = [item["type"] for item in quality["expectations"] if not item.get("success")]
         raise RuntimeError(
-            "Baseline Data Quality Gate failed; refusing to index the data. "
+            "Baseline Data Quality Gate failed after automatic repair. "
             f"Failed expectations: {', '.join(failed) or 'Freshness SLA'}. "
             f"See {settings.paths.baseline_quality_report}."
         )
@@ -61,6 +76,8 @@ def main() -> None:
         "raw_records_loaded": len(records),
         "clean_records_indexed": len(clean_df),
         "evaluation_questions": len(test_set),
+        "auto_repair_triggered": auto_repair.triggered,
+        "auto_repair_source": auto_repair.source or "not_needed",
     }
     generate_phase1_report(
         settings.paths.baseline_report,
