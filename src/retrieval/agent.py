@@ -10,9 +10,11 @@ from retrieval.index import LocalEmbeddingIndex
 from retrieval.llm import build_llm
 
 
-def build_agent(settings: Settings, index: LocalEmbeddingIndex):
+def build_agent(settings: Settings, index: LocalEmbeddingIndex, top_k: int | None = None):
+    default_top_k = top_k or settings.top_k
+
     @tool
-    def semantic_search_papers(query: str, top_k: int = 4) -> str:
+    def semantic_search_papers(query: str, top_k: int = default_top_k) -> str:
         """Search the local paper corpus with embeddings and return the most relevant papers."""
         results = index.search(query, top_k=top_k)
         lines = []

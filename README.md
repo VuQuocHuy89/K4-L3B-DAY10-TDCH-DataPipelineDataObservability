@@ -30,3 +30,14 @@
 2. Tích hợp **Freshness Check** (`age_days`) vào Quality Gate
 3. Chạy **Baseline → Corruption → Repair** → xuất bảng đối chiếu 3 trạng thái
 4. **Live Demo** trên bảng & nộp link repo lên VLearn LMS
+
+## Chạy giao diện demo pipeline
+
+Giao diện Streamlit mở đầu bằng khung hỏi đáp và các câu hỏi gợi ý. Snapshot local được chọn mặc định. Gửi câu hỏi sẽ tự chạy nạp dữ liệu, cleaning, Quality Gate, embedding/index và RAG để hiện câu trả lời Baseline cùng top-K tài liệu có điểm similarity. Sau đó bấm **Chạy Corrupted** và **Chạy Repaired** để hỏi lại đúng câu đó ở từng trạng thái. Nhật ký pipeline, dữ liệu, Quality Gate và Freshness SLA có thể mở ngay dưới kết quả; câu hỏi từ bộ benchmark có thêm Hit@K và Token F1.
+
+```bash
+uv sync
+uv run streamlit run app.py
+```
+
+Mở URL được in trong terminal (mặc định `http://localhost:8501`). Chọn câu hỏi gợi ý hoặc nhập câu hỏi vào khung chat. Đổi Top-K và nguồn dữ liệu trong thanh bên trước khi hỏi; dùng **Đặt câu hỏi mới** để bắt đầu lại.

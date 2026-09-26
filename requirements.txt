@@ -1,3 +1,4 @@
+altair>=5.5.0
 chromadb>=1.0.12
 datasets>=4.0.0
 great-expectations>=1.16.1
@@ -12,3 +13,4 @@ python-dotenv>=1.0.1
 ragas>=0.3.0
 requests>=2.32.3
 sentence-transformers>=5.0.0
+streamlit>=1.40.0
