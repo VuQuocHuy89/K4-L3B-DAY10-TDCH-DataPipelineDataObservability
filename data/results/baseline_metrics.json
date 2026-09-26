@@ -1,10 +1,17 @@
 {
   "samples": 10,
   "retrieval_hit_rate": 1.0,
+  "map": 1.0,
+  "mrr": 1.0,
+  "mean_average_precision": 1.0,
+  "mean_reciprocal_rank": 1.0,
   "mean_token_f1": 1.0,
   "judge_accuracy": 1.0,
   "mean_judge_score": 5,
   "ragas": {
-    "skipped": "Set RUN_RAGAS=1 to enable the slower Ragas pass."
+    "status": "skipped",
+    "enabled": false,
+    "message": "Set RUN_RAGAS=1 to enable the slower Ragas pass.",
+    "scores": {}
   }
 }

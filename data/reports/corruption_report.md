@@ -7,15 +7,15 @@ The corruption flow starts from the same cleaned baseline on every run, records 
 | Metric | Baseline | Corrupted | Repaired |
 | --- | ---: | ---: | ---: |
 | Retrieval Hit Rate | 100.0% | 60.0% | 100.0% |
-| Mean Average Precision (MAP) | N/A | 53.3% | 100.0% |
-| Mean Reciprocal Rank (MRR) | N/A | 53.3% | 100.0% |
+| Mean Average Precision (MAP) | 100.0% | 53.3% | 100.0% |
+| Mean Reciprocal Rank (MRR) | 100.0% | 53.3% | 100.0% |
 | Mean Token F1 | 100.0% | 70.0% | 100.0% |
 | LLM Judge Accuracy | 100.0% | 70.0% | 100.0% |
 | Mean LLM Judge Score | 5.00 / 5 | 3.80 / 5 | 5.00 / 5 |
 | Samples | 10 | 10 | 10 |
 | GX + Freshness Gate | Baseline report (see phase 1) | FAIL | PASS |
 | Freshness SLA | See baseline report | FAIL | PASS |
-| RAGAS Status | N/A | skipped | skipped |
+| RAGAS Status | skipped | error | error |
 | RAGAS Answer Relevancy | N/A | N/A | N/A |
 | RAGAS Context Precision | N/A | N/A | N/A |
 | RAGAS Context Recall | N/A | N/A | N/A |

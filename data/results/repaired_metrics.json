@@ -9,9 +9,9 @@
   "judge_accuracy": 1.0,
   "mean_judge_score": 5,
   "ragas": {
-    "status": "skipped",
-    "enabled": false,
-    "message": "Set RUN_RAGAS=1 to enable the slower Ragas pass.",
-    "scores": {}
+    "status": "error",
+    "enabled": true,
+    "scores": {},
+    "error": "Ragas evaluation failed: GOOGLE_API_KEY is required when LLM_PROVIDER=gemini."
   }
 }
