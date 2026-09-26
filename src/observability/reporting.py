@@ -65,6 +65,27 @@ def _ragas_score(metrics: dict[str, Any], key: str) -> Any:
     return scores.get(key) if isinstance(scores, dict) else None
 
 
+def _source_summary_value(key: str, value: Any) -> str:
+    """Render pipeline control-flow fields as states, not quality verdicts."""
+    if key == "auto_repair_triggered":
+        return "Triggered" if value else "Not triggered (baseline gates passed)"
+    if key == "auto_repair_source" and value == "not_needed":
+        return "Not applicable"
+    return _format_value(value)
+
+
+def _portable_artifact_path(value: Any, report_path: Path) -> str:
+    """Return an artifact path relative to the repository in generated reports."""
+    if value is None:
+        return "Not generated"
+    path = Path(str(value))
+    try:
+        repository_root = Path(report_path).resolve().parents[2]
+        return path.resolve().relative_to(repository_root).as_posix()
+    except (OSError, ValueError):
+        return path.name
+
+
 def generate_phase1_report(
     report_path,
     source_summary: dict[str, Any],
@@ -81,7 +102,8 @@ def generate_phase1_report(
         for item in expectations
     ) or "| No expectation details | N/A |"
     source_rows = "\n".join(
-        f"| {key.replace('_', ' ').title()} | {_format_value(value)} |" for key, value in source_summary.items()
+        f"| {key.replace('_', ' ').title()} | {_source_summary_value(key, value)} |"
+        for key, value in source_summary.items()
     )
 
     content = f"""# Phase 1 — Baseline Pipeline Report
@@ -142,6 +164,9 @@ def generate_corruption_report(
     repair_info: dict[str, Any] | None = None,
 ) -> None:
     repair_info = repair_info or {}
+    repair_triggered = bool(repair_info.get("triggered"))
+    repair_status = "Yes — completed" if repair_triggered else "No — quality/freshness gates passed"
+    repair_log = _portable_artifact_path(repair_info.get("log_path"), Path(report_path))
     rows: list[str] = []
     for key, label in _SCORE_KEYS:
         rows.append(
@@ -205,10 +230,10 @@ The corruption flow starts from the same cleaned baseline on every run, records 
 
 ## Automated self-healing
 
-- Triggered: **{_format_value(repair_info.get('triggered'))}**
+- Triggered: **{repair_status}**
 - Reasons: **{_format_value(', '.join(repair_info.get('reasons', [])) or 'No quality/freshness violation')}**
 - Repair source: **{_format_value(repair_info.get('source') or 'Not applicable')}**
-- Repair log: `{_format_value(repair_info.get('log_path') or 'Not generated')}`
+- Repair log: `{repair_log}`
 
 ## Three-state comparison
 

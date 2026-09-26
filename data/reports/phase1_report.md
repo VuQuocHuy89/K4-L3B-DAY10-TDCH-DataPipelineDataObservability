@@ -9,8 +9,8 @@
 | Raw Records Loaded | 24 |
 | Clean Records Indexed | 24 |
 | Evaluation Questions | 10 |
-| Auto Repair Triggered | FAIL |
-| Auto Repair Source | not_needed |
+| Auto Repair Triggered | Not triggered (baseline quality and freshness gates passed) |
+| Auto Repair Source | Not applicable |
 
 ## Baseline evaluation
 

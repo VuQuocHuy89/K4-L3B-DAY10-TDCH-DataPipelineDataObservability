@@ -11,7 +11,7 @@
 | STT | Họ và tên | MSSV | Email | Vai trò & Phân công công việc | Báo cáo cá nhân |
 |---:|---|---|---|---|---|
 | 1 | Vũ Quốc Huy | 02929 | vuquochuyforwork@gmail.com | Trưởng nhóm / Pipeline Integrator (`src/core/`, `src/pipelines/`, `script/`, `app.py`) | [02929_Vu_Quoc_Huy.md](../report/02929_Vu_Quoc_Huy.md) |
-| 2 | Tống Trần Tiến Dũng | 02791 | Nền dữ liệu và benchmark | `src/ingestion/crossref.py`, `src/ingestion/cleaning.py`, `src/evaluation/`, `src/pipelines/repair.py`; bổ sung MAP/MRR và RAGAS reporting trong phạm vi evaluation, tạo auto repair cho điểm bonus |
+| 2 | Tống Trần Tiến Dũng | 02791 | tiendung3t@gmail.com | Nền dữ liệu, benchmark và auto-repair (`src/ingestion/crossref.py`, `src/ingestion/cleaning.py`, `src/evaluation/`, `src/pipelines/repair.py`; MAP/MRR và RAGAS reporting) | [02791_Tong_Tran_Tien_Dung.md](../report/02791_Tong_Tran_Tien_Dung.md) |
 | 3 | Vũ Đức Thiên | 02437 | vuthien3002@gmail.com | Corruption & Data Observability (`src/ingestion/corruption.py`, `src/observability/`, corruption log và tests) | [02437_Vu_Duc_Thien.md](../report/02437_Vu_Duc_Thien.md) |
 | 4 | Nguyễn Hoàng Cường | 02473 | hoangcuong170825@gmail.com | RAG & Evaluation (`src/retrieval/`, `src/evaluation/metrics.py`, vector index và agent evaluation tùy chọn) | [02473_Nguyen_Hoang_Cuong.md](../report/02473_Nguyen_Hoang_Cuong.md) |
 

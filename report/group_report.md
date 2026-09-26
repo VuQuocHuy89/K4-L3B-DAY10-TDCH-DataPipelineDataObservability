@@ -14,7 +14,7 @@
 | STT | Họ và tên | MSSV | Vai trò chính | Module/deliverable sở hữu |
 | ---: | --- | --- | --- | --- |
 | 1 | Vũ Quốc Huy | 02929 | Trưởng nhóm, điều phối và tích hợp pipeline | `src/core/`, `src/pipelines/`, `script/`, `app.py` |
-| 2 | Tống Trần Tiến Dũng | 02791 | Nền dữ liệu và benchmark | `src/ingestion/crossref.py`, `src/ingestion/cleaning.py`, `src/evaluation/testset.py`; cập nhật MAP/MRR và RAGAS reporting |
+| 2 | Tống Trần Tiến Dũng | 02791 | Nền dữ liệu, benchmark và auto-repair | `src/ingestion/crossref.py`, `src/ingestion/cleaning.py`, `src/evaluation/`, `src/pipelines/repair.py` |
 | 3 | Vũ Đức Thiên | 02437 | Corruption và data observability | `src/ingestion/corruption.py`, `src/observability/`, corruption log và tests |
 | 4 | Nguyễn Hoàng Cường | 02473 | RAG, vector index và scoring | `src/retrieval/`, `src/evaluation/metrics.py`, agent evaluation tùy chọn |
 
@@ -22,7 +22,7 @@ Phân công đặt mục tiêu khoảng 25% cho mỗi thành viên. Đây là t�
 
 ## 2. Tóm tắt kết quả
 
-Nhóm TDCH hoàn thiện pipeline thử nghiệm từ snapshot Crossref đến retrieval evaluation, corruption, observability và repair. Snapshot gồm 24 bản ghi metadata bài báo có abstract; nhóm chuẩn hóa dữ liệu, tạo `text_for_embedding`, lập embedding bằng MiniLM và lưu ba collection trong ChromaDB. Bộ benchmark gồm 10 câu hỏi, được giữ nguyên khi so sánh baseline, corrupted và repaired. Baseline đạt retrieval hit rate, MAP, MRR và mean token F1 là 100%; Great Expectations 1.x cùng Freshness SLA đều PASS. Pipeline áp dụng sáu mutation có log. Một số mutation như bỏ record mới nhất, thêm nhiễu summary và cắt ngắn title chưa được quality rules hiện tại phát hiện; toàn bộ corruption kết hợp làm quality/freshness FAIL, hit rate giảm còn 60%, MAP/MRR còn 53.3% và token F1 còn 70%. Khi Quality Gate hoặc Freshness SLA của corrupted dataset thất bại, pipeline tự động kích hoạt `auto_repair_if_needed`, đọc lại raw snapshot, clean và validate lại trước khi re-index. Repair đọc lại raw snapshot, chạy cleaning, quality/freshness, tạo index và đánh giá lại; các chỉ số trở về baseline. Kết quả trigger và validation được ghi tại `data/results/repair_log.json`. Judge dùng heuristic fallback với `LLM_PROVIDER=mock`; RAGAS và agent evaluation trực tiếp chưa chạy. Vì corpus chỉ có 24 metadata records và 10 câu, kết quả chỉ mô tả snapshot thử nghiệm, chưa đại diện cho toàn văn bài báo hay hệ thống production.
+Nhóm TDCH triển khai pipeline từ Crossref snapshot đến cleaning, ChromaDB indexing, evaluation, data observability, corruption và repair. Snapshot có 24 bản ghi metadata kèm abstract; dữ liệu sạch tạo `text_for_embedding` và test set cố định gồm 10 câu. Baseline đạt hit rate, MAP, MRR và mean token F1 100%; Great Expectations 1.x và Freshness SLA đều PASS. Sáu mutation được áp dụng có log. Blank summary, duplicate rows và stale publication date làm quality/freshness gate FAIL; drop latest records, summary noise và title truncation chưa được các rule hiện tại phát hiện. Trên dữ liệu corrupted, hit rate giảm còn 60%, MAP/MRR còn 53.3%, token F1 còn 70%. Khi gate thất bại, auto-repair dựng lại dữ liệu từ `data/raw/crossref_records.json`, cleaning và kiểm tra lại trước khi re-index. Log xác nhận nguồn `raw_snapshot`, 24 rows và hai gate PASS; các metrics repaired trở lại baseline. Kết quả dùng `LLM_PROVIDER=mock` với heuristic judge; RAGAS và LangChain agent evaluation chưa chạy. Corpus chỉ chứa metadata và abstract, không có nội dung PDF toàn văn; kết quả vì vậy phản ánh snapshot và benchmark hiện tại.
 
 ## 3. Kiến trúc và luồng dữ liệu
 
@@ -51,8 +51,8 @@ Crossref API hoặc snapshot đã lưu
 | Embedding/index | Clean records và `text_for_embedding` | `sentence-transformers/all-MiniLM-L6-v2`, ChromaDB cosine index | `data/embeddings/`, `data/chroma/`, ba collection theo trạng thái | Nguyễn Hoàng Cường |
 | Evaluation | Cùng `data/eval/test_set.json` và từng collection | Top-K retrieval, extractive QA, hit rate, MAP/MRR, token F1 và judge | `data/results/*_metrics.json`, `data/results/*_answers.json` | Nguyễn Hoàng Cường; Tống Trần Tiến Dũng cập nhật MAP/MRR và RAGAS reporting |
 | Observability | Clean/corrupted/repaired dataframe | Great Expectations 1.x, completeness, uniqueness, summary length và freshness SLA | `data/quality/` | Vũ Đức Thiên |
-| Corruption/repair | Baseline clean data, quality/freshness result và raw snapshot | Sáu mutation; tự động trigger repair khi gate FAIL; rebuild và validate repaired dataset | `data/results/corruption_log.json`, `data/results/repair_log.json`, corrupted/repaired artifacts | Vũ Đức Thiên; Vũ Quốc Huy tích hợp auto-repair |
-| Orchestration | Settings, raw snapshot và test set | Chạy baseline, corruption, repair theo thứ tự và sinh report | `script/run_phase1.py`, `script/run_corruption_flow.py`, `data/reports/` | Vũ Quốc Huy |
+| Corruption/repair | Baseline clean data, quality/freshness result và raw snapshot | Sáu mutation; tự động trigger repair khi gate FAIL; rebuild và validate repaired dataset | `data/results/corruption_log.json`, `data/results/repair_log.json`, corrupted/repaired artifacts | Vũ Đức Thiên (corruption/observability), Tống Trần Tiến Dũng (auto-repair), Vũ Quốc Huy (orchestration) |
+| Orchestration và demo | Settings, raw snapshot, test set và câu hỏi | Chạy pipeline; Streamlit trình bày câu hỏi theo từng trạng thái, top-K, quality và freshness | `script/run_phase1.py`, `script/run_corruption_flow.py`, `app.py`, `data/reports/` | Vũ Quốc Huy |
 
 ## 4. Cách tái hiện kết quả
 
@@ -90,6 +90,12 @@ Corruption và repair:
 ```bash
 LLM_PROVIDER=mock REFRESH_SOURCE=0 REFRESH_TEST_SET=0 RUN_RAGAS=0 RUN_AGENT_EVALUATION=0 \
   uv run python script/run_corruption_flow.py
+```
+
+Streamlit demo:
+
+```bash
+uv run streamlit run app.py
 ```
 
 ### Kết quả tái hiện
@@ -246,14 +252,12 @@ Do các mutation chạy cùng lượt, kết quả không xác định được 
 
 ## 11. Vấn đề tích hợp quan trọng
 
-Vấn đề phát sinh ở ranh giới giữa data quality gate và repair: một số mutation có thể không làm quality gate thất bại, nên chỉ dựa vào PASS/FAIL không đủ xác nhận dữ liệu đã khôi phục.
+Vấn đề phát sinh ở ranh giới giữa data quality gate và repair: một số mutation không làm quality gate thất bại, nên chỉ dựa vào PASS/FAIL không đủ xác nhận dữ liệu đã khôi phục.
 
 - **Triệu chứng:** Corruption log ghi `drop_latest_records`, `inject_summary_noise` và `truncate_title` là silent; quality rules hiện tại không phát hiện trực tiếp các trường hợp này.
 - **Nguyên nhân:** Gate kiểm tra row-count range, null, uniqueness và summary length; chưa kiểm tra ingestion coverage, title integrity hay nhiễu ngữ nghĩa. Corrupted dataframe cũng không phải nguồn tin cậy để repair.
-- **Cách xử lý:** `corruption_flow.py` gọi `auto_repair_if_needed`; khi gate FAIL, hàm ưu tiên nạp lại `data/raw/crossref_records.json`, chạy cleaning mới, quality/freshness, tạo repaired index và đánh giá trên test set cố định.
+- **Cách xử lý:** `corruption_flow.py` gọi `auto_repair_if_needed`; khi gate FAIL, hàm ưu tiên nạp lại `data/raw/crossref_records.json`, chạy cleaning mới, kiểm tra quality/freshness, tạo repaired index và đánh giá trên test set cố định.
 - **Cách xác minh:** `data/quality/repaired_quality_report.json` và freshness đều PASS; hit rate, MAP/MRR và token F1 của repaired bằng baseline trong `data/results/*_metrics.json`.
-- **Cải thiện Auto-Repair:** Code cũ luôn gọi repair sau corruption nhưng chưa dùng kết quả Quality/Freshness để quyết định, nên đó là repair cố định chứ chưa phải self-healing có điều kiện. Code mới dùng `auto_repair_if_needed`, chỉ trigger khi gate FAIL, ghi lý do, validate lại dữ liệu và lưu audit log.
-- **Bằng chứng:** `data/results/repair_log.json` ghi `triggered=true`, `source=raw_snapshot`, `output_rows=24`, `quality_success=true` và `freshness_success=true`.
 
 ## 12. Giới hạn và hướng cải thiện
 

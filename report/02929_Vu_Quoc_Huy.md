@@ -144,4 +144,4 @@ Chạy ablation từng mutation riêng và bổ sung rule cho ingestion coverage
 - [X] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
 **Họ và tên:** Vũ Quốc Huy
-**Ngày xác nhận:** [2026-09-26]
+**Ngày xác nhận:** 2026-09-26

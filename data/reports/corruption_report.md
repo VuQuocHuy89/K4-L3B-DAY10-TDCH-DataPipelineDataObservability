@@ -4,10 +4,10 @@ The corruption flow starts from the same cleaned baseline on every run, records 
 
 ## Automated self-healing
 
-- Triggered: **PASS**
+- Triggered: **Yes — repair completed**
 - Reasons: **quality:ExpectColumnValuesToBeUnique, quality:ExpectColumnValueLengthsToBeBetween, quality:freshness**
 - Repair source: **raw_snapshot**
-- Repair log: `F:\UIT\AITC\Lab10\K4-L3B-DAY10-TDCH-DataPipelineDataObservability\data\results\repair_log.json`
+- Repair log: `data/results/repair_log.json`
 
 ## Three-state comparison
 
