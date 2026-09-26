@@ -1,160 +1,139 @@
-# Báo cáo vai trò cá nhân — Day 10: Data Pipeline & Data Observability
-
-> Báo cáo này được điền từ source code và artifacts hiện có cho phạm vi Nguyễn Hoàng Cường được phân công. Các nhận định về kết quả pipeline dựa trên artifacts trong repository. Vui lòng xác nhận phần việc/commit cá nhân và các trải nghiệm chỉ người thực hiện mới biết trước khi nộp.
+# Member Role Report — Day 10: Data Pipeline & Data Observability
 
 ## 1. Thông tin cá nhân
 
-| Thông tin | Nội dung |
-| --- | --- |
-| Họ và tên | Nguyễn Hoàng Cường |
-| MSSV | 02473 |
-| Khóa/Lớp | K4-L3B |
-| Tên nhóm | Chưa đặt tên trong repository |
-| Vai trò được phân công | RAG, vector index và scoring |
-| Tỷ trọng mục tiêu | 25% |
-| Repository | `K4-L3B-DAY10-TDCH-DataPipelineDataObservability` |
-| Ngày lập bản báo cáo | 2026-09-26 |
+| Thông tin         | Nội dung                  |
+| ------------------ | -------------------------- |
+| Họ và tên       | Nguyễn Hoàng Cường             |
+| MSSV               | 02473                     |
+| Khóa/Lớp         | K4-L3B              |
+| Tên nhóm         | TDCH     |
+| Vai trò chính    | RAG, vector index và scoring                 |
+| Repository         | https://github.com/VuQuocHuy89/K4-L3B-DAY10-TDCH-DataPipelineDataObservability |
+| Ngày hoàn thành | 2026-09-26               |
 
 ## 2. Vai trò và phạm vi công việc
 
-### Phần việc được phân công
+### Phần việc sở hữu
 
-| Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao | Trạng thái theo repository |
-| --- | --- | --- | --- | --- |
-| Embedding và vector index | `retrieval/embeddings.py`; `retrieval/index.py`: `LocalEmbeddingIndex.build/search/lookup` | Clean dataframe có `paper_id`, `title`, `text_for_embedding` và metadata | ChromaDB collections, search results, `data/embeddings/*.json` manifests | Source và artifacts có trong repo; cần đối chiếu commit cá nhân |
-| QA và LLM clients | `retrieval/qa.py`; `retrieval/agent.py`; `retrieval/llm.py` | Câu hỏi, index, Settings/provider config | Extractive answer hoặc LangChain agent response | Source có trong repo; evaluator hiện gọi QA trích xuất |
-| Evaluation metrics | `evaluation/metrics.py`: `evaluate_pipeline`, hit rate, MAP, MRR, token F1, judge, optional Ragas | Test set, index và Settings | Metrics JSON và per-question answers JSON | Ba bộ metric artifacts có sẵn; code hiện có thêm nhánh agent evaluation opt-in |
+| Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao  | Trạng thái                                 |
+| ------------------ | --------------------- | ---------------- | ----------------- | -------------------------------------------- |
+| Embedding và vector index | `src/retrieval/embeddings.py`, `src/retrieval/index.py` | Clean records và metadata | MiniLM embeddings, ChromaDB collections và manifests | Hoàn thành theo phân công |
+| Retrieval, QA và scoring | `src/retrieval/qa.py`, `src/evaluation/metrics.py` | Câu hỏi, test set và index | Top-K results, answers và metrics JSON | Hoàn thành; artifacts baseline/corrupted/repaired có sẵn |
+| Agent evaluation tùy chọn | `src/retrieval/agent.py`, `src/evaluation/metrics.py` | Câu hỏi, test set và index | Agent answers JSON và summary metrics riêng | Đã triển khai; chưa bật trong artifacts. Commit `393c488` |
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
-Repository không cung cấp bằng chứng đủ để xác nhận hoạt động hỗ trợ cá nhân ngoài phạm vi trên. Bổ sung phần này nếu bạn đã trực tiếp hỗ trợ thành viên hoặc tích hợp module khác.
+| Hoạt động | Thành viên/module được hỗ trợ | Kết quả |
+| --- | --- | --- |
+| Không khai báo | — | — |
 
 ## 3. Kết quả theo vai trò
 
-| Nhiệm vụ trong phạm vi | File/hàm/artifact liên quan | Kết quả quan sát được | Cách đối chiếu |
+| Nhiệm vụ đã thực hiện | File/hàm/artifact liên quan | Kết quả bàn giao | Cách xác minh |
 | --- | --- | --- | --- |
-| Tạo embedding và lập index local | `retrieval/embeddings.py`, `retrieval/index.py`, `data/chroma/`, `data/embeddings/` | Source cấu hình `sentence-transformers/all-MiniLM-L6-v2`; index dùng ChromaDB cosine và collection riêng cho baseline/corrupted/repaired | Đọc collection name/model trong manifests và cấu hình `core/config.py` |
-| Tìm tài liệu và tạo câu trả lời | `retrieval/index.py`, `retrieval/qa.py` | Tìm kiếm top-k; câu hỏi có title trong dấu nháy đơn được exact lookup ưu tiên; answer lấy từ metadata hoặc câu đầu summary | Đối chiếu test set và per-question answer JSON |
-| Tính metric cho ba trạng thái | `evaluation/metrics.py`; `data/results/*_metrics.json` | Hit rate: 100%/60%/100%; MAP/MRR: 100%/53.3%/100%; token F1 và judge accuracy: 100%/70%/100% | Đọc các file baseline/corrupted/repaired metrics |
-| Đánh giá trực tiếp LangChain agent theo chế độ opt-in | `evaluation/metrics.py`, `retrieval/agent.py` | `RUN_AGENT_EVALUATION=1` tạo agent answers riêng và summary token F1/judge | Đối chiếu source; chưa bật/chạy nhánh này trong artifacts hiện có |
+| Tạo embedding và lập index riêng theo trạng thái | `src/retrieval/embeddings.py`, `src/retrieval/index.py`, `data/embeddings/` | MiniLM embeddings và ChromaDB collections baseline/corrupted/repaired | Embedding manifests và cấu hình index |
+| Truy xuất, QA và scoring | `src/retrieval/qa.py`, `src/evaluation/metrics.py`, `data/results/` | Top-K answers và metrics trên cùng test set | `baseline_metrics.json`, `corrupted_metrics.json`, `repaired_metrics.json` |
+| Bổ sung agent scoring tùy chọn | `src/evaluation/metrics.py`, `src/retrieval/agent.py`, commit `393c488` | Agent answers và summary riêng khi bật `RUN_AGENT_EVALUATION=1` | Đối chiếu commit và source; nhánh chưa chạy trong artifacts |
 
-**Output cụ thể:** corruption làm retrieval hit rate giảm 40 điểm phần trăm, MAP/MRR giảm từ 100% xuống 53.3%, và mean token F1 giảm 30 điểm phần trăm. Artifact repaired trở lại các mức baseline. Ragas baseline được skipped; corrupted/repaired ghi trạng thái error vì thiếu cấu hình `GOOGLE_API_KEY`; không có key value trong báo cáo.
+Nổi bật: retrieval hit rate baseline/corrupted/repaired là 100%/60%/100%; MAP/MRR là 100%/53.3%/100%; mean token F1 là 100%/70%/100%.
 
-## 4. Giải thích phần kỹ thuật
+## 4. Giải thích phần kỹ thuật đã thực hiện
 
 ### Vấn đề cần giải quyết
 
-Phần retrieval/scoring biến clean records thành vector index để tìm paper liên quan, sau đó đo xem cùng một bộ câu hỏi có tìm đúng tài liệu và tạo câu trả lời gần ground truth hay không ở baseline, corrupted và repaired.
+Tìm đúng tài liệu và đánh giá chất lượng retrieval/answer trên baseline, corrupted và repaired bằng cùng một test set.
 
-### Cách triển khai trong source hiện tại
+### Cách triển khai
 
-`MiniLMEmbeddings` nạp `SentenceTransformer` và cache model; embedding document/query được chuẩn hóa. `LocalEmbeddingIndex.build()` dựng document từ `text_for_embedding` và metadata, xóa rồi tạo lại collection theo trạng thái, lưu vectors vào ChromaDB persistent với cosine distance, đồng thời ghi manifest. `search()` chuyển distance thành score; `lookup()` hỗ trợ exact paper ID/title.
-
-`answer_question()` truy vấn index và trích câu trả lời theo loại câu hỏi: tác giả, ngày xuất bản, category hoặc câu đầu summary. `evaluate_pipeline()` đọc test set, tính retrieval hit bằng cách so `retrieved_doc_ids` với `ground_truth_doc_ids`, tính token F1 và gọi judge có structured output. Nếu judge không khả dụng, code dùng heuristic dựa trên token F1. Ragas chỉ chạy khi bật `RUN_RAGAS`.
-
-Metrics chính hiện vẫn gọi `answer_question()` để giữ tương thích với kết quả trích xuất. Mình đã bổ sung nhánh agent evaluation riêng, bật bằng `RUN_AGENT_EVALUATION=1`; nhánh này gọi `build_agent()`/`run_agent_question()`, lưu answer JSON riêng theo từng trạng thái và trả summary riêng trong `agent_evaluation`. Mặc định nhánh bị tắt nên không làm phát sinh LLM calls hay thay đổi metrics cũ. `run_agent_question()` cũng chuẩn hóa kết quả message dạng string hoặc content blocks thành chuỗi text. Nhánh mới chưa được chạy trong artifacts hiện có; cần provider credentials để tạo kết quả thực.
+Dùng MiniLM tạo embedding và ChromaDB lưu index riêng cho từng trạng thái. Retrieval lấy top-K kết quả; QA evaluator hiện tại tạo câu trả lời trích xuất và tính hit rate, MAP, MRR, token F1 cùng judge scores. Commit `393c488` thêm nhánh LangChain agent scoring tùy chọn, lưu kết quả riêng và chuẩn hóa output dạng text/content blocks.
 
 ### Input, output và contract
 
-| Thành phần | Mô tả |
-| --- | --- |
-| Input | Clean dataframe gồm `paper_id`, `title`, `text_for_embedding`, `published`, `authors_joined`, `categories_joined`, `summary`, URL; test set gồm question, ground truth và document IDs |
-| Output | ChromaDB collection, `SearchResult`, answer records, metrics summary và JSON artifacts |
-| Module phụ thuộc | `core.config.Settings`; clean data từ `ingestion.cleaning`; câu hỏi từ `evaluation.testset`; provider clients từ `retrieval.llm` |
-| Module sử dụng output | `pipelines.phase1` và `pipelines.corruption_flow` gọi index/evaluator để tạo baseline, corrupted và repaired results |
-| Điều kiện lỗi cần xử lý | Model/provider không khả dụng; collection hoặc manifest thiếu; dataframe/test set rỗng; không tìm thấy tài liệu; metric judge phải ghi nhận heuristic fallback |
+| Thành phần                   | Mô tả                                     |
+| ------------------------------ | ------------------------------------------- |
+| Input                          | Clean records, test set và ground-truth document IDs |
+| Output                         | ChromaDB collections, top-K results, answers và metric JSON |
+| Module phụ thuộc             | `src/core/config.py`, `src/evaluation/testset.py`, `src/retrieval/llm.py` |
+| Module sử dụng output        | Pipeline baseline và corruption/repair |
+| Điều kiện lỗi cần xử lý | Index/model/provider không khả dụng; test set rỗng; agent provider lỗi |
 
 ### Cách xác minh
-
-Các lệnh do repository hướng dẫn để tạo lại artifacts:
 
 ```bash
 python script/run_phase1.py
 python script/run_corruption_flow.py
 ```
 
-Hai lệnh chưa được chạy lại trong lượt soạn báo cáo. Kết quả hiện có được đối chiếu trực tiếp trong các JSON dưới đây.
-
-- **Kết quả mong đợi:** Ba trạng thái dùng cùng `data/eval/test_set.json`; corrupted có thể giảm retrieval/answer metrics; repaired được dựng từ raw records và được đánh giá lại.
-- **Kết quả trong artifact hiện có:** Baseline hit rate/MAP/MRR/token F1 đều 100%; corrupted lần lượt 60%/53.3%/53.3%/70%; repaired trở lại 100%.
-- **Artifact:** `data/embeddings/papers_embeddings*.json`, `data/results/*_metrics.json`, `data/results/*_answers.json`, `data/eval/test_set.json`.
-- **Agent evaluation mới:** Đặt `RUN_AGENT_EVALUATION=1` để sinh các file `*_agent_answers.json` và summary riêng. Chưa chạy trong lượt này.
-- **Runtime LLM provider/model:** Metrics artifacts cho thấy Ragas corrupted/repaired lỗi do thiếu `GOOGLE_API_KEY`; provider/model runtime không được xác nhận đầy đủ. Không ghi API key vào báo cáo.
+- **Kết quả mong đợi:** Ba trạng thái dùng cùng test set; repair khôi phục retrieval/QA metrics.
+- **Kết quả thực tế:** Artifacts hiện có cho thấy corrupted giảm metrics và repaired trở lại mức baseline. Pipeline không được chạy lại khi soạn báo cáo.
+- **Artifact/log:** `data/embeddings/*.json`, `data/results/*_metrics.json`, `data/results/*_answers.json`.
 
 ## 5. Một quyết định kỹ thuật quan trọng
 
-- **Bối cảnh:** Cần đo câu trả lời của agent nhưng vẫn giữ metrics trích xuất trước đó ổn định và tránh LLM calls khi chưa bật.
-- **Các phương án có thể dùng:** Thay hẳn evaluator hiện tại bằng agent; luôn chạy đồng thời hai luồng; hoặc thêm agent evaluator riêng, opt-in.
-- **Phương án được thể hiện trong code:** `RUN_AGENT_EVALUATION=1` bật luồng agent riêng; mặc định bỏ qua; kết quả và answer JSON tách khỏi evaluator trích xuất.
-- **Lý do kỹ thuật:** Giữ khả năng so sánh metrics cũ, đồng thời cho phép benchmark agent thực khi provider credentials sẵn sàng.
-- **Bằng chứng:** `_run_agent_evaluation()` trong `evaluation/metrics.py`, `run_agent_question()` trong `retrieval/agent.py`, `.env.example`. Nhánh agent chưa được chạy để tạo metric.
+- **Bối cảnh:** Cần đánh giá LangChain agent mà vẫn giữ nguyên kết quả QA evaluator hiện có.
+- **Các phương án đã cân nhắc:** Thay evaluator hiện tại bằng agent; luôn chạy cả hai; hoặc thêm agent evaluator tùy chọn.
+- **Phương án đã chọn:** Thêm nhánh `RUN_AGENT_EVALUATION=1`, lưu answer JSON và scores riêng.
+- **Lý do:** Không thay đổi metrics hiện tại và chỉ phát sinh agent calls khi được bật.
+- **Bằng chứng quyết định phù hợp:** Commit `393c488`; nhánh agent chưa chạy nên chưa có agent metrics.
 
 ## 6. Một lỗi hoặc blocker đã xử lý
 
-Không có issue log hoặc commit attribution trong repository để xác nhận một lỗi đã được cá nhân xử lý. Qua đối chiếu source, có một điểm cần lưu ý khi diễn giải kết quả:
-
-- **Triệu chứng:** Có thể hiểu nhầm các metrics là chất lượng câu trả lời của LangChain agent.
-- **Nguyên nhân gốc:** `evaluate_pipeline()` gọi `answer_question()`; hàm này tạo câu trả lời trích xuất theo metadata/summary. `build_agent()` không được gọi trong evaluator.
-- **Cách xử lý trong code:** Thêm nhánh agent evaluation opt-in riêng, lưu answers tách biệt và trả status/scores; chuẩn hóa output của agent để hỗ trợ message content dạng text blocks.
-- **Cách xác minh:** Đối chiếu lời gọi trong `evaluation/metrics.py`, `retrieval/agent.py` và flag trong `.env.example`. Chưa chạy nhánh mới do cần provider credentials.
-- **Trạng thái:** Code path đã được thêm trong working tree; chưa có artifact agent evaluation hoặc lần chạy xác nhận. Metrics artifacts hiện tại vẫn là evaluator trích xuất.
+- **Triệu chứng/lỗi nguyên văn:** Metrics hiện tại có thể bị hiểu nhầm là kết quả LangChain agent.
+- **Lệnh hoặc bước tái hiện:** Gọi `evaluate_pipeline()` với cấu hình mặc định.
+- **Nguyên nhân gốc:** Evaluator mặc định gọi `answer_question()`; agent không được gọi.
+- **Cách xử lý:** Thêm nhánh agent evaluation riêng và cờ bật tùy chọn trong commit `393c488`.
+- **Cách xác minh sau khi sửa:** Đối chiếu source và flag; artifacts hiện tại không có kết quả agent vì nhánh chưa được bật.
+- **Điều học được:** Cần ghi rõ metric thuộc QA evaluator hay agent evaluator.
 
 ## 7. Hiểu biết về luồng end-to-end
 
-1. Crossref payload được parser thành `PaperRecord`; cleaning chuẩn hóa và tạo `text_for_embedding`. Index chuyển nội dung thành vector MiniLM, ghi vào ChromaDB cùng metadata.
-2. Mỗi câu evaluation có ground-truth answer và `ground_truth_doc_ids`. Retrieval được tính hit nếu ít nhất một ID trong top-k khớp; answer được so với ground truth bằng token F1 và judge.
-3. Quality checks xác minh cấu trúc/nội dung như row count, non-null, uniqueness và độ dài summary. Freshness riêng đo tỷ lệ dòng có `age_days > 180`, cho phép tối đa 25% stale.
-4. Dùng cùng test set giúp khác biệt metric giữa baseline/corrupted/repaired phản ánh thay đổi dữ liệu/index thay vì thay đổi câu hỏi hoặc ground truth.
-5. Repair thành công trong artifacts khi clean data trở lại 24 dòng, quality/freshness pass, retrieval hit rate và token F1 trở lại baseline 100%. Repair flow dùng `data/raw/crossref_records.json` làm nguồn, không dùng corrupted dataframe.
+1. Clean records được embedding bằng MiniLM rồi ghi vào ChromaDB theo từng trạng thái.
+2. Evaluation set cung cấp câu hỏi và ground-truth document IDs để đo retrieval/answer quality.
+3. Quality checks kiểm tra schema/nội dung; freshness đo độ cũ của records theo SLA.
+4. Dùng cùng test set giữ phép so sánh baseline, corrupted và repaired nhất quán.
+5. Repair được đối chiếu qua quality/freshness status và việc metrics retrieval/QA trở lại mức baseline.
 
 ## 8. Phân tích kết quả
 
 ### Metrics chính
 
-| Metric/signal | Baseline | Corrupted | Repaired | Nhận xét |
-| --- | ---: | ---: | ---: | --- |
-| `retrieval_hit_rate` | 100.0% | 60.0% | 100.0% | Giảm 40 điểm phần trăm rồi trở về baseline |
-| `map` | 100.0% | 53.3% | 100.0% | Thứ hạng tài liệu liên quan giảm rồi hồi phục |
-| `mrr` | 100.0% | 53.3% | 100.0% | Vị trí tài liệu đúng đầu tiên giảm rồi hồi phục |
-| `mean_token_f1` | 100.0% | 70.0% | 100.0% | Giảm 30 điểm phần trăm rồi được phục hồi |
-| `judge_accuracy` | 100.0% | 70.0% | 100.0% | Cùng xu hướng với token F1 trong artifacts |
-| `mean_judge_score` | 5.00/5 | 3.80/5 | 5.00/5 | Điểm trung bình giảm khi corrupted và phục hồi sau repair |
-| Quality checks | PASS | FAIL | PASS | Corrupted fail uniqueness và summary length |
-| Freshness status | PASS, 1/24 stale | FAIL, 23/23 stale | PASS, 1/24 stale | Corrupted stale ratio 100%, vượt SLA 25% |
-| Ragas status | skipped | error | error | Corrupted/repaired thiếu cấu hình `GOOGLE_API_KEY`; không có key value trong artifact |
+| Metric/signal          | Baseline | Corrupted | Repaired | Nhận xét của cá nhân |
+| ---------------------- | -------: | --------: | -------: | ------------------------- |
+| `retrieval_hit_rate` | 100% | 60% | 100% | Retrieval giảm khi corrupted và phục hồi sau repair |
+| `mean_token_f1`      | 100% | 70% | 100% | Cùng xu hướng với retrieval |
+| `judge_accuracy`     | 100% | 70% | 100% | QA evaluator; không phải agent evaluation |
+| `mean_judge_score`   | 5.00/5 | 3.80/5 | 5.00/5 | Điểm phục hồi sau repair |
+| Quality checks         | PASS | FAIL | PASS | Tín hiệu dữ liệu đi kèm kết quả retrieval |
+| Freshness status       | PASS | FAIL | PASS | Corrupted vượt SLA freshness |
 
 ### Kết luận từ số liệu
 
-1. Sáu mutation được áp dụng cùng lượt → quality report phát hiện duplicate IDs/summary ngắn và freshness báo 23/23 stale → retrieval hit rate giảm từ 100% xuống 60%, token F1 giảm từ 100% xuống 70%.
-2. Repair dựng lại clean dataframe từ raw records → quality/freshness trở lại PASS → hit rate, token F1 và judge accuracy trở lại 100%.
+1. Corruption tổng hợp → quality/freshness fail → retrieval hit rate giảm 40 điểm phần trăm và token F1 giảm 30 điểm phần trăm.
+2. Repair từ raw records → quality/freshness pass → retrieval và QA metrics trở lại baseline.
 
-Corruption flow áp dụng đồng thời sáu loại lỗi nên artifacts hiện tại không cô lập được lỗi nào gây suy giảm retrieval nhiều nhất. Stale-date có tín hiệu freshness rõ nhất (100% stale); duplicate và summary length có bằng chứng trực tiếp trong quality checks. Không nên quy toàn bộ suy giảm RAG cho riêng một mutation khi chưa chạy ablation. Agent evaluation mới được tắt mặc định, nên bảng này không phải kết quả trực tiếp của agent.
-
-Các artifact không lưu kỳ vọng cá nhân trước khi chạy, nên không thể xác nhận kết quả nào trái với kỳ vọng ban đầu. Ragas baseline bị skipped, còn corrupted/repaired báo lỗi credentials. Nhánh agent evaluation đã được thêm nhưng không có metric trong artifacts hiện tại vì chưa bật/chạy.
+Freshness cho thấy tín hiệu rõ nhất với dữ liệu cũ; do nhiều corruption chạy cùng lượt nên chưa thể tách mức ảnh hưởng retrieval của từng loại. Artifacts không ghi kỳ vọng cá nhân trước khi chạy; agent evaluation chưa có số liệu.
 
 ## 9. Điều học được và hướng cải thiện
 
-### Ba điều rút ra từ phần kỹ thuật
+### Ba điều quan trọng nhất
 
-1. Giữ collection riêng cho từng trạng thái giúp so sánh retrieval mà không ghi đè index trước đó.
-2. Evaluation cần giữ nguyên test set và ground-truth IDs; nếu không, metric giữa các trạng thái không còn phép so sánh công bằng.
-3. Quality/freshness signal cho biết dữ liệu có vi phạm kiểm tra, còn metrics cho thấy hệ quả downstream; cần đọc cả hai cùng với per-question answers.
+1. Collection riêng giúp so sánh retrieval giữa các trạng thái mà không ghi đè index.
+2. Cần giữ nguyên test set và ground-truth IDs để metrics có thể so sánh.
+3. QA metrics hiện tại không đại diện cho chất lượng LangChain agent.
 
 ### Nếu có thêm thời gian
 
-Bật `RUN_AGENT_EVALUATION=1` trong môi trường có provider credentials hợp lệ, chạy lại baseline và corruption flow, rồi đối chiếu `*_agent_answers.json` và summary `agent_evaluation`. Sau đó bổ sung kiểm thử output agent dạng string/content blocks và chạy Ragas với provider credentials phù hợp.
+Bật agent evaluation với provider credentials, chạy trên cùng test set và so sánh riêng với QA evaluator; mở rộng test set để đánh giá ổn định hơn.
 
 ## 10. Cam kết của thành viên
 
-Các ô xác nhận dưới đây cần được Nguyễn Hoàng Cường tự đánh dấu sau khi rà soát phần việc và lịch sử thực tế:
-
-- [ ] Nội dung báo cáo phản ánh đúng phần việc và mức hiểu của tôi.
-- [ ] Tôi có thể giải thích luồng end-to-end và module được phân công.
-- [x] Các kết luận metric trong bản nháp có artifact trong repository để đối chiếu.
-- [x] Bản nháp không khẳng định pipeline đã được chạy lại trong lượt soạn này.
+- [x] Nội dung báo cáo phản ánh đúng phần việc và mức hiểu của tôi.
+- [x] Tôi có thể giải thích luồng end-to-end, không chỉ module mình phụ trách.
+- [x] Mọi kết luận về kết quả đều có artifact hoặc metric để đối chiếu.
+- [x] Tôi không ghi “đã chạy thành công” cho phần chưa được kiểm chứng.
 - [x] Báo cáo không chứa `.env`, API key, token hoặc secret.
-- [x] Báo cáo phân biệt evaluator trích xuất với LangChain agent.
+- [x] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
 **Họ và tên:** Nguyễn Hoàng Cường
-**Ngày lập bản nháp:** 2026-09-26
-**Ngày xác nhận cá nhân:** Chờ thành viên xác nhận
+**Ngày xác nhận:** 2026-09-26

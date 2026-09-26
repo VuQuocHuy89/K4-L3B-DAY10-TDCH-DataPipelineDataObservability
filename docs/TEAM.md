@@ -53,9 +53,7 @@
 ### ## Nguyễn Hoàng Cường-02473
 
 - **Vai trò:** Phụ trách RAG, Vector Index và Scoring.
-- **Công việc chi tiết đã hoàn thành:**
-  - Phụ trách embedding MiniLM, ChromaDB index, truy xuất top-K và QA trên các collection baseline/corrupted/repaired.
-  - Bổ sung nhánh đánh giá LangChain agent ở chế độ tùy chọn trong `src/evaluation/metrics.py` và `src/retrieval/agent.py`; nhánh này chưa được bật trong artifacts hiện tại.
-  - Commit `393c488` có thay đổi agent evaluation nhưng Git hiện ghi tác giả là `unknown`; thành viên cần tự kiểm tra GitHub Insights để xác nhận attribution.
+- **Phần việc:** Embedding MiniLM, ChromaDB index, truy xuất top-K và QA trên các collection baseline/corrupted/repaired.
+- **Commit có thể đối chiếu:** `393c488` bổ sung nhánh LangChain agent scoring tùy chọn trong `src/evaluation/metrics.py` và chuẩn hóa output trong `src/retrieval/agent.py`.
 - **Điều học được / Đóng góp chính:**
-  - Dùng cùng test set và collection riêng cho từng trạng thái giúp so sánh retrieval; cần phân biệt metric của QA evaluator hiện chạy với nhánh agent evaluation chưa chạy.
+  - Dùng cùng test set và collection riêng giúp so sánh retrieval; cần phân biệt metric QA hiện có với nhánh agent evaluation chưa chạy.
